@@ -61,7 +61,7 @@ int main(){
 
     for (int nIndex = 0; nIndex < 64; nIndex++)
     {
-        std::cout << &fr[nIndex] << std::endl; 
+        std::cout << fr.fds_bits[nIndex] << std::endl; 
     }
 
     return 0;
