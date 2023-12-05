@@ -9,176 +9,121 @@
 #include <sys/types.h> 
 #include <sys/socket.h> 
 #include <netinet/in.h> 
-#include <sys/time.h> //FD_SET, FD_ISSET, FD_ZERO macros 
-	
-#define TRUE 1 
-#define FALSE 0 
-#define PORT 8888 
-	
-int main(int argc , char *argv[]) 
-{ 
-	int opt = TRUE; 
-	int master_socket , addrlen , new_socket , client_socket[30] , 
-		max_clients = 30 , activity, i , valread , sd; 
-	int max_sd; 
-	struct sockaddr_in address; 
-		
-	char buffer[1025]; //data buffer of 1K 
-		
-	//set of socket descriptors 
-	fd_set readfds; 
-		
-	//a message 
-	char *message = (char *)"ECHO Daemon v1.0 \r\n"; 
-	
-	//initialise all client_socket[] to 0 so not checked 
-	for (i = 0; i < max_clients; i++) 
-	{ 
-		client_socket[i] = 0; 
-	} 
-		
-	//create a master socket 
-	if( (master_socket = socket(AF_INET , SOCK_STREAM , 0)) == 0) 
-	{ 
-		perror("socket failed"); 
-		exit(EXIT_FAILURE); 
-	} 
-	
-	//set master socket to allow multiple connections , 
-	//this is just a good habit, it will work without this 
-	if( setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&opt, 
-		sizeof(opt)) < 0 ) 
-	{ 
-		perror("setsockopt"); 
-		exit(EXIT_FAILURE); 
-	} 
-	
-	//type of socket created 
-	address.sin_family = AF_INET; 
-	address.sin_addr.s_addr = INADDR_ANY; 
-	address.sin_port = htons( PORT ); 
-		
-	//bind the socket to localhost port 8888 
-	if (bind(master_socket, (struct sockaddr *)&address, sizeof(address))<0) 
-	{ 
-		perror("bind failed"); 
-		exit(EXIT_FAILURE); 
-	} 
-	printf("Listener on port %d \n", PORT); 
-		
-	//try to specify maximum of 3 pending connections for the master socket 
-	if (listen(master_socket, 3) < 0) 
-	{ 
-		perror("listen"); 
-		exit(EXIT_FAILURE); 
-	} 
-		
-	//accept the incoming connection 
-	addrlen = sizeof(address); 
-	puts("Waiting for connections ..."); 
-		
-	while(TRUE) 
-	{ 
-		//clear the socket set 
-		FD_ZERO(&readfds); 
-	
-		//add master socket to set 
-		FD_SET(master_socket, &readfds); 
-		max_sd = master_socket; 
-			
-		//add child sockets to set 
-		for ( i = 0 ; i < max_clients ; i++) 
-		{ 
-			//socket descriptor 
-			sd = client_socket[i]; 
-				
-			//if valid socket descriptor then add to read list 
-			if(sd > 0) 
-				FD_SET( sd , &readfds); 
-				
-			//highest file descriptor number, need it for the select function 
-			if(sd > max_sd) 
-				max_sd = sd; 
-		} 
-	
-		//wait for an activity on one of the sockets , timeout is NULL , 
-		//so wait indefinitely 
-		activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL); 
-	
-		if ((activity < 0) && (errno!=EINTR)) 
-		{ 
-			printf("select error"); 
-		} 
-			
-		//If something happened on the master socket , 
-		//then its an incoming connection 
-		if (FD_ISSET(master_socket, &readfds)) 
-		{ 
-			if ((new_socket = accept(master_socket, 
-					(struct sockaddr *)&address, (socklen_t*)&addrlen))<0) 
-			{ 
-				perror("accept"); 
-				exit(EXIT_FAILURE); 
-			} 
-			
-			//inform user of socket number - used in send and receive commands 
-			printf("New connection , socket fd is %d , ip is : %s , port : %d \n" , new_socket , inet_ntoa(address.sin_addr) , ntohs 
-				(address.sin_port)); 
-		
-			//send new connection greeting message 
-			if( send(new_socket, message, strlen(message), 0) != strlen(message) ) 
-			{ 
-				perror("send"); 
-			} 
-				
-			puts("Welcome message sent successfully"); 
-				
-			//add new socket to array of sockets 
-			for (i = 0; i < max_clients; i++) 
-			{ 
-				//if position is empty 
-				if( client_socket[i] == 0 ) 
-				{ 
-					client_socket[i] = new_socket; 
-					printf("Adding to list of sockets as %d\n" , i); 
-						
-					break; 
-				} 
-			} 
-		} 
-			
-		//else its some IO operation on some other socket 
-		for (i = 0; i < max_clients; i++) 
-		{ 
-			sd = client_socket[i]; 
-				
-			if (FD_ISSET( sd , &readfds)) 
-			{ 
-				//Check if it was for closing , and also read the 
-				//incoming message 
-				if ((valread = read( sd , buffer, 1024)) == 0) 
-				{ 
-					//Somebody disconnected , get his details and print 
-					getpeername(sd , (struct sockaddr*)&address , (socklen_t*)&addrlen); 
-					printf("Host disconnected , ip %s , port %d \n" , 
-						inet_ntoa(address.sin_addr) , ntohs(address.sin_port)); 
-						
-					//Close the socket and mark as 0 in list for reuse 
-					close( sd ); 
-					client_socket[i] = 0; 
-				} 
-					
-				//Echo back the message that came in 
-				else
-				{ 
-					//set the string terminating NULL byte on the end 
-					//of the data read 
-					buffer[valread] = '\0'; 
-					send(sd , buffer , strlen(buffer) , 0 ); 
-				} 
-			} 
-		} 
-	} 
-		
-	return 0; 
-} 
+#include <sys/time.h>
+#include <iostream>
+
+#define MAX_CLIENTS 10
+#define PORT 8878
+
+struct sockaddr_in srv, client;
+fd_set readfds, fw, fe;
+
+int main(){
+    int activity, max_sd, sd, maxClients = MAX_CLIENTS;
+    int nRet = 0;
+    int addrlen, clientSockets[MAX_CLIENTS];
+    char buff[1024];
+    int serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    if (serverSocket < 0)
+    {
+        std::cout << "The socket not oppened" << std::endl;
+    }
+    else{
+        std::cout << "socket has opened successfully\n";
+    }
+    srv.sin_family = AF_INET;
+    srv.sin_port = htons(PORT);
+    srv.sin_addr.s_addr = INADDR_ANY;
+    memset(&(srv.sin_zero), 0, 8);
+    addrlen = sizeof(srv);
+    nRet = bind(serverSocket, (sockaddr*)&srv, sizeof(sockaddr));
+    if(nRet < 0)
+    {
+        std::cout << "Fail to bind to loacal port\n";
+        exit(EXIT_FAILURE);
+    }
+    else{
+        std::cout << "The socket bined successfully\n";
+    }
+
+    nRet = listen(serverSocket, 5);
+    if(nRet < 0)
+    {
+        std::cout << "max count of connections was full(5)\n";
+        exit(EXIT_FAILURE);
+    }
+
+    for(int i = 0; i < MAX_CLIENTS; i++){
+        clientSockets[i] = 0;
+    }
+
+    while (true)
+    {
+        FD_ZERO(&readfds);
+        FD_SET(serverSocket, &readfds);
+
+        max_sd = serverSocket;
+
+        for(int i = 0; i < maxClients; i++){
+            sd = clientSockets[i];
+            if(sd > 0)
+            {
+                FD_SET(sd, &readfds);
+            }
+            if(sd > max_sd)
+            {
+                max_sd = sd;
+            }
+        }
+
+        activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
+        if((activity < 0) && (errno != EINTR))
+        {
+            perror("Select error");
+        }
+        // new conection has come 
+        if (FD_ISSET(serverSocket, &readfds) != 0)
+        {
+            int newSocket;
+            if ((newSocket = accept(serverSocket, (struct sockaddr*)&srv, (socklen_t*)&addrlen)) < 0) {
+                perror("Accept failed");
+                exit(EXIT_FAILURE);
+            }
+
+            for (int i = 0; i < max_sd; i++)
+            {
+                if(clientSockets[i] == 0)
+                {
+                    clientSockets[i] = newSocket;
+                    break;
+                }
+            }
+        }
+
+        for(int i = 0; i < max_sd; i++)
+        {
+            sd = clientSockets[i];
+            if(FD_ISSET(sd, &readfds))
+            {
+                int valread = read(sd, buff, sizeof(buff));
+                if (valread == 0) {
+                    // Connection closed by client
+                    getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
+                    std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl;
+                    close(sd);
+                    clientSockets[i] = 0;
+                } 
+                else{
+                    char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
+                    int send_res=send(sd,arr,sizeof(arr),0);
+                    // send(sd, reply, strlen(reply), 0);
+                    printf("%s\n", buff);
+                    // send(sd, buff, valread, 0);
+                }
+            }
+        }
+
+    }
+    return 0;
+}
