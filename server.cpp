@@ -11,9 +11,11 @@
 #include <netinet/in.h> 
 #include <sys/time.h>
 #include <iostream>
-
+#include <algorithm>
+#include <string>
+#include "./src/app/parser/RequestParser.hpp"
 #define MAX_CLIENTS 10
-#define PORT 8878
+#define PORT 8884
 
 struct sockaddr_in srv, client;
 fd_set readfds, fw, fe;
@@ -22,7 +24,7 @@ int main(){
     int activity, max_sd, sd, maxClients = MAX_CLIENTS;
     int nRet = 0;
     int addrlen, clientSockets[MAX_CLIENTS];
-    char buff[1024];
+    char buff[10000];
     int serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     if (serverSocket < 0)
@@ -30,7 +32,7 @@ int main(){
         std::cout << "The socket not oppened" << std::endl;
     }
     else{
-        std::cout << "socket has opened successfully\n";
+        std::cout << "socket has opened on port " << PORT << std::endl;
     }
     srv.sin_family = AF_INET;
     srv.sin_port = htons(PORT);
@@ -44,7 +46,7 @@ int main(){
         exit(EXIT_FAILURE);
     }
     else{
-        std::cout << "The socket bined successfully\n";
+        std::cout << "The socket bined successfully\n\n\n";
     }
 
     nRet = listen(serverSocket, 5);
@@ -107,19 +109,21 @@ int main(){
             if(FD_ISSET(sd, &readfds))
             {
                 int valread = read(sd, buff, sizeof(buff));
+                // int valread = read(sd, buff, sizeof(buff));
                 if (valread == 0) {
                     // Connection closed by client
                     getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
-                    std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl;
+                    std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
                     close(sd);
                     clientSockets[i] = 0;
                 } 
                 else{
                     char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
                     int send_res=send(sd,arr,sizeof(arr),0);
-                    // send(sd, reply, strlen(reply), 0);
-                    printf("%s\n", buff);
-                    // send(sd, buff, valread, 0);
+                    std::string strBuff(buff);
+                    RequestParser request(strBuff, valread);
+                    request.launchParse();
+                    // request.launchParse();
                 }
             }
         }

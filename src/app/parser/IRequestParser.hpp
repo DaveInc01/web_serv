@@ -1,6 +1,10 @@
 #ifndef IREQUESTPARSER
 #define IREQUESTPARSER
 
+#include <map>
+#include <iostream>
+#include <string>
+
 class IRequestParser {
 protected:
    char* url;
@@ -8,7 +12,7 @@ protected:
    char* route;
    char* query;
    char* content;
-   char* buff;
+   std::string buff;
 };
 
 #endif
