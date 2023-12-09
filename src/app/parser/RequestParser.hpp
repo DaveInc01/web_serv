@@ -10,7 +10,7 @@ public:
       RequestParser(std::string, int);
 
       int parseUrl();
-      int parseMethod();
+      int parseMethod(std::string);
       int parseRoute();
       int parseQuery();
       int parseConent();

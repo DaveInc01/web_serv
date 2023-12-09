@@ -10,9 +10,22 @@ int RequestParser::parseUrl()
    return  0;
 }
 
-int RequestParser::parseMethod()
+int RequestParser::parseMethod(std::string line)
 {
-   return 0;
+   std::string reqMethods[3] = {"GET", "POST", "DELETE"};
+   int i = 0;
+   int found = std::string::npos;
+   while(i < 3)
+   {
+      if(line.find(reqMethods[i]) == 0)
+      {
+         this->method = reqMethods[i];
+         return 0;
+      }
+      else
+         i++;
+   }
+   return -1;
 }
 
 int RequestParser::parseRoute()
@@ -38,8 +51,8 @@ int RequestParser::launchParse()
    
    while ((line = RequestParser::getLine(index)).length() > 0)
    {
-      // if (line[i] == '\0')
-      //    break;
+      if(i == 0)
+         parseMethod(line);
       std::cout << line << std::endl;
    }
    return 0;

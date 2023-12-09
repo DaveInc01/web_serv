@@ -7,11 +7,11 @@
 
 class IRequestParser {
 protected:
-   char* url;
-   char* method;
-   char* route;
-   char* query;
-   char* content;
+   std::string url;
+   std::string method;
+   std::string route;
+   std::string query;
+   std::string content;
    std::string buff;
 };
 
