@@ -15,7 +15,7 @@
 #include <string>
 #include "./src/app/parser/RequestParser.hpp"
 #define MAX_CLIENTS 10
-#define PORT 8884
+#define PORT 8882
 
 struct sockaddr_in srv, client;
 fd_set readfds, fw, fe;
@@ -122,8 +122,13 @@ int main(){
                     int send_res=send(sd,arr,sizeof(arr),0);
                     std::string strBuff(buff);
                     RequestParser request(strBuff, valread);
+                    try{
+                        request.launchParse();
+                    }
+                    catch(const char* error){
+                        std::cout << error << std::endl;
+                    }
                     request.launchParse();
-                    // request.launchParse();
                 }
             }
         }

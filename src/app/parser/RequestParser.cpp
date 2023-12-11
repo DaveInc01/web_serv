@@ -14,7 +14,7 @@ int RequestParser::parseMethod(std::string line)
 {
    std::string reqMethods[3] = {"GET", "POST", "DELETE"};
    int i = 0;
-   int found = std::string::npos;
+   int found;
    while(i < 3)
    {
       if(line.find(reqMethods[i]) == 0)
@@ -52,8 +52,15 @@ int RequestParser::launchParse()
    while ((line = RequestParser::getLine(index)).length() > 0)
    {
       if(i == 0)
-         parseMethod(line);
-      std::cout << line << std::endl;
+      {
+         if(parseMethod(line) == -1)
+            throw("Unknown request method");
+      }
+      // if(line.find("\n", 2) != std::string::npos)
+      //    std::cout << "---------\n";
+      // std::cout << line.length() << std::endl;
+      std::cout << line;
+      i++;
    }
    return 0;
 }
@@ -62,11 +69,12 @@ std::string RequestParser::getLine(int &index)
 {
    std::string line = "";
    
-   while ((buff[index] != '\n') && (index < buff_len))
+   while (index < buff_len)
    {
       line.push_back(buff[index]);
       index++;
+      if(buff[index] == '\n')
+         break;
    }
-   index++;
    return line;
 }
