@@ -55,15 +55,21 @@ int RequestParser::launchParse()
       {
          if(parseMethod(line) == -1)
             throw("Unknown request method");
+         this->request["0"] = line;
       }
-      // if(line.find("\n", 2) != std::string::npos)
-      //    std::cout << "---------\n";
-      // std::cout << line.length() << std::endl;
-      std::cout << line;
+      if (i >= 1)
+      {
+         std::cout<< "split after\n";
+         std::pair<std::string, std::string> *p = ft_split(line, ':');
+         // if(p != NULL)
+            // this->request.insert(*p);
+      }
+      std::cout << line << std::endl;
       i++;
    }
    return 0;
 }
+
 
 std::string RequestParser::getLine(int &index)
 {
@@ -76,5 +82,5 @@ std::string RequestParser::getLine(int &index)
       if(buff[index] == '\n')
          break;
    }
-   return line;
+   return (rtrim(line));
 }

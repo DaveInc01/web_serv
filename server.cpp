@@ -15,7 +15,7 @@
 #include <string>
 #include "./src/app/parser/RequestParser.hpp"
 #define MAX_CLIENTS 10
-#define PORT 8882
+#define PORT 8875
 
 struct sockaddr_in srv, client;
 fd_set readfds, fw, fe;
@@ -109,7 +109,6 @@ int main(){
             if(FD_ISSET(sd, &readfds))
             {
                 int valread = read(sd, buff, sizeof(buff));
-                // int valread = read(sd, buff, sizeof(buff));
                 if (valread == 0) {
                     // Connection closed by client
                     getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
