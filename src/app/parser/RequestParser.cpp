@@ -54,17 +54,32 @@ int RequestParser::launchParse()
       if(i == 0)
       {
          if(parseMethod(line) == -1)
+         {
+            std::cout << line;
             throw("Unknown request method");
-         this->request["0"] = line;
+         }
+         this->request["start"] = line;
+         std::cout << line;
       }
       if (i >= 1)
       {
-         std::cout<< "split after\n";
-         std::pair<std::string, std::string> *p = ft_split(line, ':');
+         if(line.find(':') != std::string::npos)
+            std::pair<std::string, std::string> p = ft_split(line, ':');
+         else{
+            //trying to get the postmethod content
+            while ((line = RequestParser::getLine(index)).length() > 0)
+            {
+               //sort the body in the map
+               std::cout << line;
+            }
+         }
+         std::cout << "line-" << line;
+         if(ltrim(rtrim(line)).size() < 1)
+            std::cout << "the empty line ----------\n";
          // if(p != NULL)
             // this->request.insert(*p);
       }
-      std::cout << line << std::endl;
+      // std::cout << line << std::endl;
       i++;
    }
    return 0;
@@ -80,7 +95,11 @@ std::string RequestParser::getLine(int &index)
       line.push_back(buff[index]);
       index++;
       if(buff[index] == '\n')
+      {
+         line.push_back(buff[index]);
+         index++;
          break;
+      }
    }
-   return (rtrim(line));
+   return (line);
 }

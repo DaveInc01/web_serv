@@ -14,18 +14,13 @@ std::string& ltrim(std::string& s)
     return s;
 }
 
-std::pair<std::string, std::string> *ft_split(std::string s, char del){
-    std::pair<std::string, std::string> *arr = NULL;
+std::pair<std::string, std::string> ft_split(std::string s, char del){
+    std::pair<std::string, std::string> arr;
     std::string left, right;
     int i = s.find(del);
-    if(i != std::string::npos)
-    {
-        left = s.substr(0, i);
-        right = s.substr(i+1, s.size());
-        std::cout << "left - " << ltrim(left) << std::endl;
-        std::cout << "right - " << right << std::endl;
-        arr->first = left;
-        arr->second = right;
-    }
-    return arr;
+    left = s.substr(0, i);
+    right = s.substr(i+1, s.size());
+    arr.first = left;
+    arr.second = right;
+    return (arr);
 }
