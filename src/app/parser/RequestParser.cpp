@@ -5,6 +5,18 @@ RequestParser::RequestParser(std::string req, int len){
    buff_len = len;
 }
 
+int RequestParser::setProperties(){
+   parseRoute();
+   std::cout << "ROUTE - " << this->route << "HTTP_VERSION" << this->http_v << std::endl;
+   std::vector<std::string>::iterator it = post_body.begin();
+   while(it != post_body.end())
+   {
+      std::cout << *it;
+      ++it;
+   }
+   return 0;
+}
+
 int RequestParser::parseUrl()
 {
    return  0;
@@ -30,9 +42,37 @@ int RequestParser::parseMethod(std::string line)
 
 int RequestParser::parseRoute()
 {
+   std::string line = this->request.find("start")->second;
+   int start = line.find('/');
+   int end = line.find(' ', start);
+   if (start != std::string::npos && end != std::string::npos)
+   {
+      try{
+         this->route = line.substr(start, (end - start));
+      }
+      catch(std::exception &e)
+      {
+         std::cout << e.what() << std::endl; 
+      }
+      parseHttpVersion(line);
+   }
    return 0;
 }
 
+int RequestParser::parseHttpVersion(std::string line)
+{
+   int sub_start = line.rfind('/');
+   if(sub_start != std::string::npos)
+   {
+      try{
+         this->http_v = line.substr(sub_start + 1, (line.size() - sub_start));;
+      }
+      catch(std::exception &e){
+         std::cout << e.what() << std::endl;
+      }
+   }
+   return 0;
+}
 int RequestParser::parseQuery()
 {
    return 0;
@@ -57,7 +97,7 @@ int RequestParser::launchParse()
             throw("Unknown request method");
 
          std::cout << line;
-         this->request.insert(request.end(), {"start", rtrim(line)});
+         this->request.insert(std::make_pair("start", line));
       }
       if (line_index >= 1)
       {
@@ -71,22 +111,23 @@ int RequestParser::launchParse()
          else {
             std::cout << "char_index - " << char_index << "\nbuff_len - " << buff_len << std::endl;
             //trying to get the post method content
-            std::ofstream myfile;
-            myfile.open ("example.txt");
-            std::cout << "file was opened\n";
+            // std::ofstream myfile;
+            // myfile.open ("example.txt");
+            // std::cout << "file was opened\n";
             while ((line = RequestParser::getLine(char_index)).length() > 0)
             {
                //sort the body in the map
-               myfile << line;
+               this->post_body.push_back(line);
+               // myfile << line;
                std::cout <<"content - "<< line;
             }
-            myfile.close();
+            // myfile.close();
          }
          std::cout << "line-" << line;
       }
       line_index++;
    }
-   
+   setProperties();
    // std::map<std::string, std::string>::iterator it = request.begin();
    // while(it != request.end())
    // {

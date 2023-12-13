@@ -12,9 +12,12 @@ public:
       int parseUrl();
       int parseMethod(std::string);
       int parseRoute();
+      int parseHttpVersion(std::string);
       int parseQuery();
       int parseConent();
       int launchParse();
+      int setProperties();
+
       std::string getLine(int &);
 
       std::map<std::string, std::string> request;

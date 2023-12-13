@@ -15,7 +15,7 @@
 #include <string>
 #include "./src/app/parser/RequestParser.hpp"
 #define MAX_CLIENTS 10
-#define PORT 8867
+#define PORT 8866
 
 struct sockaddr_in srv, client;
 fd_set readfds, fw, fe;

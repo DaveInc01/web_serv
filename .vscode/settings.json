@@ -70,6 +70,10 @@
         "locale": "cpp",
         "mutex": "cpp",
         "ratio": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "fstream": "cpp",
+        "iomanip": "cpp",
+        "stack": "cpp",
+        "filesystem": "cpp"
     }
 }

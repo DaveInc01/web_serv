@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <vector>
 
 class IRequestParser {
 protected:
@@ -14,6 +15,8 @@ protected:
    std::string query;
    std::string content;
    std::string buff;
+   std::string http_v;
+   std::vector<std::string> post_body;
 };
 
 
