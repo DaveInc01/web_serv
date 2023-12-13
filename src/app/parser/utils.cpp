@@ -20,7 +20,7 @@ std::pair<std::string, std::string> ft_split(std::string s, char del){
     int i = s.find(del);
     left = s.substr(0, i);
     right = s.substr(i+1, s.size());
-    arr.first = left;
-    arr.second = right;
+    arr.first = rtrim(left);
+    arr.second = rtrim((right));
     return (arr);
 }

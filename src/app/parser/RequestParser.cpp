@@ -45,43 +45,54 @@ int RequestParser::parseConent()
 
 int RequestParser::launchParse()
 {
-   int index = 0;
-   int i = 0;
+   int char_index = 0;
+   int line_index = 0;
    std::string line;
    
-   while ((line = RequestParser::getLine(index)).length() > 0)
+   while ((line = RequestParser::getLine(char_index)).length() > 0)
    {
-      if(i == 0)
+      if(line_index == 0)
       {
          if(parseMethod(line) == -1)
-         {
-            std::cout << line;
             throw("Unknown request method");
-         }
-         this->request["start"] = line;
+
          std::cout << line;
+         this->request.insert(request.end(), {"start", rtrim(line)});
       }
-      if (i >= 1)
+      if (line_index >= 1)
       {
          if(line.find(':') != std::string::npos)
-            std::pair<std::string, std::string> p = ft_split(line, ':');
-         else{
-            //trying to get the postmethod content
-            while ((line = RequestParser::getLine(index)).length() > 0)
+         {
+            std::pair<std::string, std::string> p_line = ft_split(line, ':');
+            request.insert(request.end(), p_line);
+         }
+         else if(char_index == buff_len)
+            std::cout << "end of request\n";
+         else {
+            std::cout << "char_index - " << char_index << "\nbuff_len - " << buff_len << std::endl;
+            //trying to get the post method content
+            std::ofstream myfile;
+            myfile.open ("example.txt");
+            std::cout << "file was opened\n";
+            while ((line = RequestParser::getLine(char_index)).length() > 0)
             {
                //sort the body in the map
-               std::cout << line;
+               myfile << line;
+               std::cout <<"content - "<< line;
             }
+            myfile.close();
          }
          std::cout << "line-" << line;
-         if(ltrim(rtrim(line)).size() < 1)
-            std::cout << "the empty line ----------\n";
-         // if(p != NULL)
-            // this->request.insert(*p);
       }
-      // std::cout << line << std::endl;
-      i++;
+      line_index++;
    }
+   
+   // std::map<std::string, std::string>::iterator it = request.begin();
+   // while(it != request.end())
+   // {
+   //    std::cout << it->first << it->second << std::endl;
+   //    ++it;
+   // }
    return 0;
 }
 
