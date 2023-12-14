@@ -21,6 +21,6 @@ std::pair<std::string, std::string> ft_split(std::string s, char del){
     left = s.substr(0, i);
     right = s.substr(i+1, s.size());
     arr.first = rtrim(left);
-    arr.second = rtrim((right));
+    arr.second = ltrim(rtrim((right)));
     return (arr);
 }

@@ -5,15 +5,33 @@ RequestParser::RequestParser(std::string req, int len){
    buff_len = len;
 }
 
+int RequestParser::setValue(std::string key, std::string &obj_property)
+{
+   std::string value;
+   if(request.find(key) != request.end())
+   {
+      value = request.find(key)->second;
+      obj_property = value;
+      return (0);
+   }
+   return -1;
+}
+
 int RequestParser::setProperties(){
    parseRoute();
-   std::cout << "ROUTE - " << this->route << "HTTP_VERSION" << this->http_v << std::endl;
-   std::vector<std::string>::iterator it = post_body.begin();
-   while(it != post_body.end())
+   if(this->method == "POST")
    {
-      std::cout << *it;
-      ++it;
+      setValue("Content-Length", this->content_length);
+      setValue("Content-Type", this->content_type);
    }
+   // std::cout << "Content-Length_my - " << this->content_length <<
+   // std::endl << "Content-type_my - " << this->content_type << std::endl;
+   // std::vector<std::string>::iterator it = post_body.begin();
+   // while(it != post_body.end())
+   // {
+   //    std::cout << *it;
+   //    ++it;
+   // }
    return 0;
 }
 
@@ -78,10 +96,7 @@ int RequestParser::parseQuery()
    return 0;
 }
 
-int RequestParser::parseConent()
-{
-   return 0;
-}
+
 
 int RequestParser::launchParse()
 {
@@ -109,25 +124,36 @@ int RequestParser::launchParse()
          else if(char_index == buff_len)
             std::cout << "end of request\n";
          else {
+            // set obj preoperties values
+            setProperties();
             std::cout << "char_index - " << char_index << "\nbuff_len - " << buff_len << std::endl;
             //trying to get the post method content
-            // std::ofstream myfile;
-            // myfile.open ("example.txt");
-            // std::cout << "file was opened\n";
+            std::ofstream myfile;
+            size_t sub_start = content_type.rfind('/');
+            // ++sub_start;
+            std::string type;
+            if(sub_start != std::string::npos)
+            {
+               type = content_type.substr(sub_start, content_type.size() - sub_start);
+               type[0] = '.';
+            }
+            myfile.open ("example" + type);
+            std::cout << "file name - " << "example" << type << std::endl;
+            std::cout << "file was opened\n";
             while ((line = RequestParser::getLine(char_index)).length() > 0)
             {
                //sort the body in the map
-               this->post_body.push_back(line);
-               // myfile << line;
+               // this->post_body.push_back(line);
+               myfile << line;
                std::cout <<"content - "<< line;
             }
-            // myfile.close();
+            myfile.close();
          }
          std::cout << "line-" << line;
       }
       line_index++;
    }
-   setProperties();
+   
    // std::map<std::string, std::string>::iterator it = request.begin();
    // while(it != request.end())
    // {
@@ -141,7 +167,7 @@ int RequestParser::launchParse()
 std::string RequestParser::getLine(int &index)
 {
    std::string line = "";
-   
+      
    while (index < buff_len)
    {
       line.push_back(buff[index]);

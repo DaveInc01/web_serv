@@ -13,9 +13,12 @@ protected:
    std::string method;
    std::string route;
    std::string query;
-   std::string content;
+   std::string content_type;
+   std::string content_length;
+   
    std::string buff;
    std::string http_v;
+
    std::vector<std::string> post_body;
 };
 

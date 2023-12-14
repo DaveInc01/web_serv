@@ -17,6 +17,7 @@ public:
       int parseConent();
       int launchParse();
       int setProperties();
+      int setValue(std::string, std::string &);
 
       std::string getLine(int &);
 
