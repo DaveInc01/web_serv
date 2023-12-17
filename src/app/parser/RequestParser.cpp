@@ -1,9 +1,6 @@
 #include "RequestParser.hpp"
 
-RequestParser::RequestParser(std::string req, int len){
-   buff = req;
-   buff_len = len;
-}
+int RequestParser::parse_count = 0;
 
 int RequestParser::setValue(std::string key, std::string &obj_property)
 {
@@ -42,6 +39,7 @@ int RequestParser::parseUrl()
 
 int RequestParser::parseMethod(std::string line)
 {
+   std::cout << "First line - " << line << std::endl;
    std::string reqMethods[3] = {"GET", "POST", "DELETE"};
    int i = 0;
    int found;
@@ -98,15 +96,16 @@ int RequestParser::parseQuery()
 
 
 
-int RequestParser::launchParse()
+int RequestParser::launchParse( std::string buff, int len )
 {
    int char_index = 0;
    int line_index = 0;
+   char_index = 0;
+   buff_len = len;
    std::string line;
-   
-   while ((line = RequestParser::getLine(char_index)).length() > 0)
+   while ((line = RequestParser::getLine(char_index, buff)).length() > 0)
    {
-      if(line_index == 0)
+      if((line_index == 0) && (parse_count == 0))
       {
          if(parseMethod(line) == -1)
             throw("Unknown request method");
@@ -114,36 +113,37 @@ int RequestParser::launchParse()
          std::cout << line;
          this->request.insert(std::make_pair("start", line));
       }
-      if (line_index >= 1)
+      if (line_index >= 1 || parse_count > 0)
       {
-         if(line.find(':') != std::string::npos)
+         if((line.find(':') != std::string::npos) && (parse_count == 0))
          {
             std::pair<std::string, std::string> p_line = ft_split(line, ':');
             request.insert(request.end(), p_line);
          }
-         else if(char_index == buff_len)
+         else if((char_index == buff_len) && (parse_count == 0))
             std::cout << "end of request\n";
          else {
             // set obj preoperties values
-            setProperties();
-            std::cout << "char_index - " << char_index << "\nbuff_len - " << buff_len << std::endl;
-            //trying to get the post method content
-            std::ofstream myfile;
-            size_t sub_start = content_type.rfind('/');
-            // ++sub_start;
-            std::string type;
-            if(sub_start != std::string::npos)
+            if(parse_count == 0)
             {
-               type = content_type.substr(sub_start, content_type.size() - sub_start);
-               type[0] = '.';
+               setProperties();
+               std::cout << "char_index - " << char_index << "\nbuff_len - " << buff_len << std::endl;
+               //trying to get the post method content
+               size_t sub_start = content_type.rfind('/');
+               std::string type;
+               if(sub_start != std::string::npos)
+               {
+                  type = content_type.substr(sub_start, content_type.size() - sub_start);
+                  type[0] = '.';
+               }
+               post_req_filename = "example" + type;
             }
-            myfile.open ("example" + type);
-            std::cout << "file name - " << "example" << type << std::endl;
+            std::ofstream myfile;
+            myfile.open (post_req_filename);
+            std::cout << "file name - " << post_req_filename << std::endl;
             std::cout << "file was opened\n";
-            while ((line = RequestParser::getLine(char_index)).length() > 0)
+            while ((line = RequestParser::getLine(char_index, buff)).length() > 0)
             {
-               //sort the body in the map
-               // this->post_body.push_back(line);
                myfile << line;
                std::cout <<"content - "<< line;
             }
@@ -153,18 +153,14 @@ int RequestParser::launchParse()
       }
       line_index++;
    }
+   std::cout << "End of request num - " << parse_count << std::endl;
+   parse_count++;
    
-   // std::map<std::string, std::string>::iterator it = request.begin();
-   // while(it != request.end())
-   // {
-   //    std::cout << it->first << it->second << std::endl;
-   //    ++it;
-   // }
    return 0;
 }
 
 
-std::string RequestParser::getLine(int &index)
+std::string RequestParser::getLine(int &index, std::string buff)
 {
    std::string line = "";
       

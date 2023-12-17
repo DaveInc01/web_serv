@@ -13,29 +13,43 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
-#include "./src/app/parser/RequestParser.hpp"
+#include <vector>
+#include "RequestParser.hpp"
+#include <fcntl.h>
 #define MAX_CLIENTS 10
-#define SERVERCOUNT 2
+// #define servers_count 2
 struct sockaddr_in srv, client;
 fd_set readfds, fw, fe, tmpReadfds;
 
-struct {
+struct config_t {
     int ip;
     int port;
     int buff_size;
     std::string location;
     std::string root;
-}   configs;
+};
 
 int main(){
-    int ports[SERVERCOUNT] = {8880, 7770};
-    int serverSockets[SERVERCOUNT];
+    std::vector<config_t> configs_v;
+    config_t srv1_conf;
+    srv1_conf.buff_size = 1024;
+    srv1_conf.port = 8006;
+    configs_v.push_back(srv1_conf);
+    config_t srv2_conf;
+    srv2_conf.buff_size = 1024;
+    srv2_conf.port = 8000;
+    configs_v.push_back(srv2_conf);
+
+    // int ports[serves_count] = {8800, 7777};
+    int servers_count = configs_v.size();
+    int serverSockets[servers_count];
     int activity, max_sd, sd, maxClients = MAX_CLIENTS;
     int nRet = 0;
     int addrlen, clientSockets[MAX_CLIENTS];
-    char buff[400];
-    
-    for (int i = 0; i < SERVERCOUNT; i++)
+    char buff[1024];
+
+    std::cout << "servers count is " << servers_count << std::endl;
+    for (int i = 0; i < servers_count; i++)
     {
 
         serverSockets[i] = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -45,13 +59,20 @@ int main(){
             std::cout << "The socket not oppened" << std::endl;
         }
         else{
-            std::cout << "socket has opened on port " << ports[i] << std::endl;
+            std::cout << "socket has opened on port " << configs_v[i].port << std::endl;
         }
         srv.sin_family = AF_INET;
-        srv.sin_port = htons(ports[i]);
+        srv.sin_port = htons(configs_v[i].port);
         srv.sin_addr.s_addr = INADDR_ANY;
+        // inet_pton(AF_INET, "10.12.0.1", &srv.sin_addr);
         memset(&(srv.sin_zero), 0, 8);
         addrlen = sizeof(srv);
+         int l = 1;
+        setsockopt(serverSockets[i], SOL_SOCKET, SO_REUSEADDR, &l, sizeof(l));
+        if (fcntl(serverSockets[i], F_SETFL, O_NONBLOCK, FD_CLOEXEC) < 0)
+        {
+            exit(1);
+        }
         nRet = bind(serverSockets[i], (sockaddr*)&srv, sizeof(sockaddr));
         if(nRet < 0)
         {
@@ -78,7 +99,7 @@ int main(){
     while (true)
     {
         FD_ZERO(&tmpReadfds);
-        for (int i = 0; i < SERVERCOUNT; i++)
+        for (int i = 0; i < servers_count; i++)
         {
             FD_SET(serverSockets[i], &tmpReadfds);
 
@@ -104,7 +125,7 @@ int main(){
         }
         
         // new conection has come 
-        for(int i = 0; i < SERVERCOUNT; i++)
+        for(int i = 0; i < servers_count; i++)
         {
             if (FD_ISSET(serverSockets[i], &readfds) != 0)
             {
@@ -129,30 +150,34 @@ int main(){
                 sd = clientSockets[i];
                 if(FD_ISSET(sd, &readfds))
                 {
-                    int valread = read(sd, buff, sizeof(buff));
-                    if (valread == 0) {
-                        // Connection closed by client
-                        getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
-                        std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
-                        close(sd);
-                        clientSockets[i] = 0;
-                    } 
-                    else{
-                        char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
-                        int send_res=send(sd,arr,sizeof(arr),0);
+                    int valread;
+                    RequestParser request;
+                    while ((valread = read(sd, buff, sizeof(buff))))
+                    {
+                        std::cout << "read start - " << valread << std::endl;
                         std::string strBuff(buff);
-                        RequestParser request(strBuff, valread);
                         try{
-                            request.launchParse();
+                            request.launchParse(strBuff, valread);
                         }
                         catch(const char* error){
                             std::cout << error << std::endl;
+                            break ;
                         }
+                        std::cout << "read end - " << valread << std::endl;
                     }
+                    // if (valread == 0) {
+                        // Connection closed by client
+                        std::cout << "Response is ready\n";
+                        char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
+                        int send_res = send(sd,arr,sizeof(arr),0);
+                        getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
+                        std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
+                        close(sd);
+                    // }
+                    clientSockets[i] = 0;
                 }
             }
         }
-    
     }
     return 0;
 }
