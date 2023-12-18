@@ -33,11 +33,11 @@ int main(){
     std::vector<config_t> configs_v;
     config_t srv1_conf;
     srv1_conf.buff_size = 1024;
-    srv1_conf.port = 8006;
+    srv1_conf.port = 8007;
     configs_v.push_back(srv1_conf);
     config_t srv2_conf;
     srv2_conf.buff_size = 1024;
-    srv2_conf.port = 8000;
+    srv2_conf.port = 7007;
     configs_v.push_back(srv2_conf);
 
     // int ports[serves_count] = {8800, 7777};
@@ -71,6 +71,7 @@ int main(){
         setsockopt(serverSockets[i], SOL_SOCKET, SO_REUSEADDR, &l, sizeof(l));
         if (fcntl(serverSockets[i], F_SETFL, O_NONBLOCK, FD_CLOEXEC) < 0)
         {
+            std::cout << "Fcntl error\n";
             exit(1);
         }
         nRet = bind(serverSockets[i], (sockaddr*)&srv, sizeof(sockaddr));
@@ -150,9 +151,9 @@ int main(){
                 sd = clientSockets[i];
                 if(FD_ISSET(sd, &readfds))
                 {
-                    int valread;
+                    int valread = read(sd, buff, sizeof(buff));
                     RequestParser request;
-                    while ((valread = read(sd, buff, sizeof(buff))))
+                    if (valread > 0)
                     {
                         std::cout << "read start - " << valread << std::endl;
                         std::string strBuff(buff);
@@ -164,8 +165,9 @@ int main(){
                             break ;
                         }
                         std::cout << "read end - " << valread << std::endl;
+                        close(sd);
                     }
-                    // if (valread == 0) {
+                    else {
                         // Connection closed by client
                         std::cout << "Response is ready\n";
                         char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
@@ -173,7 +175,7 @@ int main(){
                         getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
                         std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
                         close(sd);
-                    // }
+                    }
                     clientSockets[i] = 0;
                 }
             }
