@@ -19,7 +19,7 @@
 #define MAX_CLIENTS 10
 // #define servers_count 2
 struct sockaddr_in srv, client;
-fd_set readfds, fw, fe, tmpReadfds;
+fd_set readfds, writefds, fe, tmpReadfds;
 
 struct config_t {
     int ip;
@@ -39,6 +39,8 @@ int main(){
     srv2_conf.buff_size = 1024;
     srv2_conf.port = 7007;
     configs_v.push_back(srv2_conf);
+
+    std::map<int, RequestParser> clients;
 
     // int ports[serves_count] = {8800, 7777};
     int servers_count = configs_v.size();
@@ -141,6 +143,10 @@ int main(){
                     if(clientSockets[i] == 0)
                     {
                         clientSockets[i] = newSocket;
+                        std::pair<int, RequestParser> clients_elem;
+                        clients_elem.first = newSocket;
+                        clients_elem.second = RequestParser();
+                        clients.insert(clients_elem);
                         break;
                     }
                 }
@@ -151,31 +157,32 @@ int main(){
                 sd = clientSockets[i];
                 if(FD_ISSET(sd, &readfds))
                 {
-                    int valread = read(sd, buff, sizeof(buff));
-                    RequestParser request;
+
+                    int valread = recv(sd, buff, sizeof(buff), 0);
                     if (valread > 0)
                     {
                         std::cout << "read start - " << valread << std::endl;
                         std::string strBuff(buff);
                         try{
-                            request.launchParse(strBuff, valread);
+                            clients[sd].launchParse(strBuff, valread);
                         }
                         catch(const char* error){
                             std::cout << error << std::endl;
                             break ;
                         }
                         std::cout << "read end - " << valread << std::endl;
-                        close(sd);
+                        // close(sd);
                     }
-                    else {
+                    // else {
                         // Connection closed by client
                         std::cout << "Response is ready\n";
                         char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
                         int send_res = send(sd,arr,sizeof(arr),0);
                         getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
                         std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
+                        clients.erase(sd);                           
                         close(sd);
-                    }
+                    // }
                     clientSockets[i] = 0;
                 }
             }

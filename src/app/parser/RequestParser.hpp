@@ -2,8 +2,7 @@
 #define REQUESTPARSER
 
 #include "IRequestParser.hpp"
-
-
+ 
 
 class RequestParser : public IRequestParser {
 public:
@@ -19,6 +18,7 @@ public:
       int setProperties();
       int setValue(std::string, std::string &);
       std::string getLine(int &, std::string);
+      
 
       std::map<std::string, std::string> request;
       static int parse_count;
