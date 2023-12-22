@@ -120,7 +120,6 @@ int main(){
             }
         }
         memcpy(&readfds, &tmpReadfds, sizeof(tmpReadfds));
-
         activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
         if((activity < 0) && (errno != EINTR))
         {
@@ -145,6 +144,7 @@ int main(){
                         clientSockets[i] = newSocket;
                         std::pair<int, RequestParser> clients_elem;
                         clients_elem.first = newSocket;
+                        // std::cout << "New socket is - " << newSocket << std::endl;
                         clients_elem.second = RequestParser();
                         clients.insert(clients_elem);
                         break;
@@ -154,16 +154,18 @@ int main(){
 
             for(int i = 0; i < max_sd; i++)
             {
+                std::cout << "clientSocket[i] == " << clientSockets[i] << std::endl;
                 sd = clientSockets[i];
                 if(FD_ISSET(sd, &readfds))
                 {
+                    std::cout << "sd is - " << sd << std::endl;
 
                     int valread = recv(sd, buff, sizeof(buff), 0);
                     if (valread > 0)
                     {
                         std::string strBuff(buff);
                         try{
-                            clients[sd].launchParse(strBuff, valread);
+                            clients[sd].launchParse(strBuff, strBuff.size());
                         }
                         catch(const char* error){
                             std::cout << error << std::endl;
@@ -171,20 +173,18 @@ int main(){
                         }
                         if(strBuff.find("\r\n\r\n") != std::string::npos)
                         {
+
                             std::cout << "Response is ready\n";
                             char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
                             int send_res = send(sd,arr,sizeof(arr),0);
                             getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
                             std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
+                            
                             clients.erase(sd);                           
                             close(sd);
+                            clientSockets[i] = 0;
                         }
                     }
-                    // else {
-                        // Connection closed by client
-                        
-                    // }
-                    clientSockets[i] = 0;
                 }
             }
         }

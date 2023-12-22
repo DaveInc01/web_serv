@@ -100,7 +100,6 @@ int RequestParser::launchParse( std::string buff, int len )
 {
    int char_index = 0;
    int line_index = 0;
-   char_index = 0;
    buff_len = len;
    std::string line;
    while ((line = RequestParser::getLine(char_index, buff)).length() > 0)
@@ -153,9 +152,7 @@ int RequestParser::launchParse( std::string buff, int len )
       }
       line_index++;
    }
-   std::cout << "End of request num - " << parse_count << std::endl;
    parse_count++;
-   
    return 0;
 }
 
