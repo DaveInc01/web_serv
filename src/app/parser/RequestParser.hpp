@@ -6,7 +6,7 @@
 
 class RequestParser : public IRequestParser {
 public:
-      RequestParser(){};
+      RequestParser();
 
       int parseUrl();
       int parseMethod(std::string);
@@ -20,10 +20,7 @@ public:
       std::string getLine(int &, std::string);
       
 
-      std::map<std::string, std::string> request;
-      static int parse_count;
-      int buff_len;
-      std::string post_req_filename;
+      
 };
 
 

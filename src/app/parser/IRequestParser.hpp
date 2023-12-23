@@ -18,8 +18,15 @@ protected:
    
    std::string buff;
    std::string http_v;
+   std::map<std::string, std::string> request;
+   int parse_count;
+   int buff_len;
+   int header_finish;
+   std::string post_req_filename;
+   std::string post_req_body;
 
-   std::vector<std::string> post_body;
+
+   // std::vector<std::string> post_body;
 };
 
 

@@ -1,6 +1,10 @@
 #include "RequestParser.hpp"
 
-int RequestParser::parse_count = 0;
+RequestParser::RequestParser(){
+   parse_count = 0;
+   header_finish = 0;
+};
+
 
 int RequestParser::setValue(std::string key, std::string &obj_property)
 {
@@ -20,6 +24,7 @@ int RequestParser::setProperties(){
    {
       setValue("Content-Length", this->content_length);
       setValue("Content-Type", this->content_type);
+
    }
    // std::cout << "Content-Length_my - " << this->content_length <<
    // std::endl << "Content-type_my - " << this->content_type << std::endl;
@@ -39,7 +44,6 @@ int RequestParser::parseUrl()
 
 int RequestParser::parseMethod(std::string line)
 {
-   std::cout << "First line - " << line << std::endl;
    std::string reqMethods[3] = {"GET", "POST", "DELETE"};
    int i = 0;
    int found;
@@ -48,6 +52,7 @@ int RequestParser::parseMethod(std::string line)
       if(line.find(reqMethods[i]) == 0)
       {
          this->method = reqMethods[i];
+         this->request.insert(std::make_pair("start", line));
          return 0;
       }
       else
@@ -102,17 +107,18 @@ int RequestParser::launchParse( std::string buff, int len )
    int line_index = 0;
    buff_len = len;
    std::string line;
+   std::cout << "PARSE COUNT " << parse_count << std::endl;
    while ((line = RequestParser::getLine(char_index, buff)).length() > 0)
    {
+      /* --Parse First Method Line */
       if((line_index == 0) && (parse_count == 0))
       {
          if(parseMethod(line) == -1)
             throw("Unknown request method");
-
          std::cout << line;
-         this->request.insert(std::make_pair("start", line));
       }
-      if (line_index >= 1 || parse_count > 0)
+
+      if (line_index >= 1)
       {
          if((line.find(':') != std::string::npos) && (parse_count == 0))
          {
@@ -120,7 +126,7 @@ int RequestParser::launchParse( std::string buff, int len )
             request.insert(request.end(), p_line);
          }
          else if((char_index == buff_len) && (parse_count == 0))
-            std::cout << "end of request\n";
+            setProperties();
          else {
             // set obj preoperties values
             if(parse_count == 0)

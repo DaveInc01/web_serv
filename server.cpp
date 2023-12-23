@@ -18,7 +18,7 @@
 #include <fcntl.h>
 #define MAX_CLIENTS 10
 // #define servers_count 2
-struct sockaddr_in srv, client;
+struct sockaddr_in srv;
 fd_set readfds, writefds, fe, tmpReadfds;
 
 struct config_t {
@@ -42,7 +42,6 @@ int main(){
 
     std::map<int, RequestParser> clients;
 
-    // int ports[serves_count] = {8800, 7777};
     int servers_count = configs_v.size();
     int serverSockets[servers_count];
     int activity, max_sd, sd, maxClients = MAX_CLIENTS;
@@ -98,7 +97,6 @@ int main(){
         }
     }
 
-
     while (true)
     {
         FD_ZERO(&tmpReadfds);
@@ -113,6 +111,7 @@ int main(){
             if(sd > 0)
             {
                 FD_SET(sd, &tmpReadfds);
+                std::cout << "sd is set - " << sd <<std::endl;
             }
             if(sd > max_sd)
             {
@@ -125,7 +124,6 @@ int main(){
         {
             perror("Select error");
         }
-        
         // new conection has come 
         for(int i = 0; i < servers_count; i++)
         {
@@ -136,15 +134,14 @@ int main(){
                     perror("Accept failed");
                     exit(EXIT_FAILURE);
                 }
-
-                for (int i = 0; i < max_sd; i++)
+                for (int i = 0; i < MAX_CLIENTS; i++)
                 {
                     if(clientSockets[i] == 0)
                     {
                         clientSockets[i] = newSocket;
+                        FD_SET(newSocket, &readfds);
                         std::pair<int, RequestParser> clients_elem;
                         clients_elem.first = newSocket;
-                        // std::cout << "New socket is - " << newSocket << std::endl;
                         clients_elem.second = RequestParser();
                         clients.insert(clients_elem);
                         break;
@@ -154,7 +151,6 @@ int main(){
 
             for(int i = 0; i < max_sd; i++)
             {
-                std::cout << "clientSocket[i] == " << clientSockets[i] << std::endl;
                 sd = clientSockets[i];
                 if(FD_ISSET(sd, &readfds))
                 {
@@ -174,7 +170,6 @@ int main(){
                         if(strBuff.find("\r\n\r\n") != std::string::npos)
                         {
 
-                            std::cout << "Response is ready\n";
                             char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
                             int send_res = send(sd,arr,sizeof(arr),0);
                             getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
@@ -187,6 +182,15 @@ int main(){
                     }
                 }
             }
+            // std::map<int, RequestParser>::iterator it = clients.begin();
+            
+            // for (it; it != clients.end(); it++)
+            // {
+            //     if(FD_ISSET(it->first, &readfds))
+            //     {
+            //         std::cout << "sd - " << it->first << std::endl;
+            //     }
+            // }
         }
     }
     return 0;
