@@ -22,4 +22,9 @@ clean:
 
 re:	fclean all
 
+push:
+	git add .
+	git commit -m "changes"
+	git push
+
 .PHONY: all clean fclean re
