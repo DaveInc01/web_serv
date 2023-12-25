@@ -159,25 +159,31 @@ int main(){
                     int valread = recv(sd, buff, sizeof(buff), 0);
                     if (valread > 0)
                     {
+                        printf("%s", buff);
                         std::string strBuff(buff);
                         try{
-                            clients[sd].launchParse(strBuff, strBuff.size());
+                            clients.at(sd).launchParse(strBuff, strBuff.size());
                         }
                         catch(const char* error){
                             std::cout << error << std::endl;
                             break ;
                         }
-                        if(strBuff.find("\r\n\r\n") != std::string::npos)
+                        if((clients.at(sd).getMethod() != "POST"))
                         {
-
-                            char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
-                            int send_res = send(sd,arr,sizeof(arr),0);
-                            getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
-                            std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
+                            if(strBuff.find("\r\n\r\n") != std::string::npos)
+                            {
+                                char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
+                                int send_res = send(sd,arr,sizeof(arr),0);
+                                getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
+                                std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
+                                
+                                clients.erase(sd);                           
+                                close(sd);
+                                clientSockets[i] = 0;
+                            }
+                        }
+                        else{
                             
-                            clients.erase(sd);                           
-                            close(sd);
-                            clientSockets[i] = 0;
                         }
                     }
                 }

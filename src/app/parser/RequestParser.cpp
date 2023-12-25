@@ -1,12 +1,14 @@
 #include "RequestParser.hpp"
 
 RequestParser::RequestParser(){
-   parse_count = 0;
    header_finish = 0;
+   is_req_end = 0;
+   header_line_finish = 1;
+   content_length_int = 0;
 };
 
 
-int RequestParser::setValue(std::string key, std::string &obj_property)
+int   RequestParser::setValue(std::string key, std::string &obj_property)
 {
    std::string value;
    if(request.find(key) != request.end())
@@ -18,26 +20,21 @@ int RequestParser::setValue(std::string key, std::string &obj_property)
    return -1;
 }
 
-int RequestParser::setProperties(){
+int   RequestParser::setProperties(){
    parseRoute();
    if(this->method == "POST")
    {
-      setValue("Content-Length", this->content_length);
       setValue("Content-Type", this->content_type);
+      if(setValue("Content-Length", this->content_length) != -1)
+         this->content_length_int = atoi(content_length.c_str());
+
 
    }
-   // std::cout << "Content-Length_my - " << this->content_length <<
-   // std::endl << "Content-type_my - " << this->content_type << std::endl;
-   // std::vector<std::string>::iterator it = post_body.begin();
-   // while(it != post_body.end())
-   // {
-   //    std::cout << *it;
-   //    ++it;
-   // }
+   
    return 0;
 }
 
-int RequestParser::parseUrl()
+int   RequestParser::parseUrl()
 {
    return  0;
 }
@@ -61,7 +58,7 @@ int RequestParser::parseMethod(std::string line)
    return -1;
 }
 
-int RequestParser::parseRoute()
+int   RequestParser::parseRoute()
 {
    std::string line = this->request.find("start")->second;
    int start = line.find('/');
@@ -80,7 +77,7 @@ int RequestParser::parseRoute()
    return 0;
 }
 
-int RequestParser::parseHttpVersion(std::string line)
+int   RequestParser::parseHttpVersion(std::string line)
 {
    int sub_start = line.rfind('/');
    if(sub_start != std::string::npos)
@@ -101,82 +98,114 @@ int RequestParser::parseQuery()
 
 
 
-int RequestParser::launchParse( std::string buff, int len )
+int   RequestParser::launchParse( std::string buff, int len )
 {
    int char_index = 0;
-   int line_index = 0;
-   buff_len = len;
+   this->buff_len = len;
+   this->buff = buff;
+   this->http_req.append(buff);
    std::string line;
-   std::cout << "PARSE COUNT " << parse_count << std::endl;
-   while ((line = RequestParser::getLine(char_index, buff)).length() > 0)
-   {
-      /* --Parse First Method Line */
-      if((line_index == 0) && (parse_count == 0))
-      {
-         if(parseMethod(line) == -1)
-            throw("Unknown request method");
-         std::cout << line;
-      }
 
-      if (line_index >= 1)
+   while ((line = RequestParser::getLine(char_index)).length() > 0)
+   {
+      /* Header is exist */
+      if(!header_finish)
       {
-         if((line.find(':') != std::string::npos) && (parse_count == 0))
-         {
-            std::pair<std::string, std::string> p_line = ft_split(line, ':');
-            request.insert(request.end(), p_line);
-         }
-         else if((char_index == buff_len) && (parse_count == 0))
-            setProperties();
-         else {
-            // set obj preoperties values
-            if(parse_count == 0)
+         /* Unit Line parse was finished */
+         if(header_line_finish){
+            /* Start line is empty */
+            if(this->method.empty())
             {
+               if(parseMethod(line) == -1)
+                  throw("Unknown request method");
+               // std::cout << "start - " << line;
+            }
+            /* End of request header */
+            else if(line == "\r\n"){
+               header_finish = 1;
                setProperties();
-               std::cout << "char_index - " << char_index << "\nbuff_len - " << buff_len << std::endl;
-               //trying to get the post method content
-               size_t sub_start = content_type.rfind('/');
-               std::string type;
-               if(sub_start != std::string::npos)
-               {
-                  type = content_type.substr(sub_start, content_type.size() - sub_start);
-                  type[0] = '.';
-               }
-               post_req_filename = "example" + type;
             }
-            std::ofstream myfile;
-            myfile.open (post_req_filename);
-            std::cout << "file name - " << post_req_filename << std::endl;
-            std::cout << "file was opened\n";
-            while ((line = RequestParser::getLine(char_index, buff)).length() > 0)
-            {
-               myfile << line;
-               std::cout <<"content - "<< line;
+            /* Common line of header with ':' */
+            else{
+               std::pair<std::string, std::string> p_line = ft_split(line, ':');
+               request.insert(request.end(), p_line);
             }
-            myfile.close();
          }
-         std::cout << "line-" << line;
+         else{
+            this->unfinished_line = line;
+            continue;
+         }
       }
-      line_index++;
    }
-   parse_count++;
+   findReqEnd();
+
+
+   // if(!(this->post_req_body.empty()))
+   //    std::cout << this->post_req_body;
+
+   
    return 0;
 }
 
 
-std::string RequestParser::getLine(int &index, std::string buff)
+std::string RequestParser::getLine(int &index)
 {
    std::string line = "";
       
    while (index < buff_len)
    {
-      line.push_back(buff[index]);
-      index++;
-      if(buff[index] == '\n')
+      if(!header_finish)
       {
-         line.push_back(buff[index]);
-         index++;
-         break;
+         if(!header_line_finish)
+         {
+            line = unfinished_line;
+            line.push_back(this->buff[index]);
+            unfinished_line.erase();
+            this->header_line_finish = 1;
+         }
+         else
+         {
+            line.push_back(this->buff[index]);
+         }
+         if(this->buff[index] == '\n')
+         {
+            index++;
+            return(line);
+         }
+      }
+      else{
+         post_req_body.push_back(this->buff[index]);
+      }
+      index++;
+   }
+   /* if header line was not finished */
+   int line_len = line.length();
+   if((line_len > 0) && (header_finish <= 0))
+      if(line[line_len-1] != '\n')
+         this->header_line_finish = -1;
+
+   return (line);
+}
+
+int   RequestParser::findReqEnd()
+{
+   if(this->http_req.find("\r\n\r\n") != std::string::npos)
+   {
+      if(this->method != "POST")
+         this->is_req_end = 1;  
+      else{
+         if(this->transfer_encoding != "chunked")
+         {
+            if(this->content_length_int > 0)
+            {
+               if(this->post_req_body.length() == content_length_int)
+                  this->is_req_end = 1;
+            }
+         }
+         else{
+            /* create chuked req end logic */
+         }
       }
    }
-   return (line);
+   return (0);
 }

@@ -8,25 +8,33 @@
 #include <vector>
 
 class IRequestParser {
+public:
+   std::string getUrl();
+   std::string getMethod();
+   std::string getRoute();
+   std::string getContentType();
+   std::string getContentLength();
+   std::string getPostReqBody();
+
 protected:
-   std::string url;
    std::string method;
    std::string route;
-   std::string query;
+   std::string http_v;
+   std::string url;
    std::string content_type;
    std::string content_length;
-   
+   int         content_length_int;
+   std::string transfer_encoding;
    std::string buff;
-   std::string http_v;
-   std::map<std::string, std::string> request;
-   int parse_count;
-   int buff_len;
-   int header_finish;
    std::string post_req_filename;
    std::string post_req_body;
-
-
-   // std::vector<std::string> post_body;
+   std::string unfinished_line;
+   std::string http_req;
+   int         buff_len;
+   int         header_finish;
+   int         header_line_finish;
+   int         is_req_end;
+   std::map<std::string, std::string>  request;
 };
 
 
