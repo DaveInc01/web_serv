@@ -30,3 +30,8 @@ std::string IRequestParser::getPostReqBody()
 {
     return this->post_req_body;
 }
+
+int IRequestParser::getIsReqEnd()
+{
+    return this->is_req_end;
+}

@@ -91,12 +91,11 @@ int   RequestParser::parseHttpVersion(std::string line)
    }
    return 0;
 }
+
 int RequestParser::parseQuery()
 {
    return 0;
 }
-
-
 
 int   RequestParser::launchParse( std::string buff, int len )
 {
@@ -139,11 +138,6 @@ int   RequestParser::launchParse( std::string buff, int len )
    }
    findReqEnd();
 
-
-   // if(!(this->post_req_body.empty()))
-   //    std::cout << this->post_req_body;
-
-   
    return 0;
 }
 
@@ -198,7 +192,7 @@ int   RequestParser::findReqEnd()
          {
             if(this->content_length_int > 0)
             {
-               if(this->post_req_body.length() == content_length_int)
+               if(this->post_req_body.length() >= content_length_int)
                   this->is_req_end = 1;
             }
          }

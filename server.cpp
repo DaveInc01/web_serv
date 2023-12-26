@@ -47,7 +47,7 @@ int main(){
     int activity, max_sd, sd, maxClients = MAX_CLIENTS;
     int nRet = 0;
     int addrlen, clientSockets[MAX_CLIENTS];
-    char buff[1024];
+
 
     std::cout << "servers count is " << servers_count << std::endl;
     for (int i = 0; i < servers_count; i++)
@@ -111,7 +111,6 @@ int main(){
             if(sd > 0)
             {
                 FD_SET(sd, &tmpReadfds);
-                std::cout << "sd is set - " << sd <<std::endl;
             }
             if(sd > max_sd)
             {
@@ -134,12 +133,13 @@ int main(){
                     perror("Accept failed");
                     exit(EXIT_FAILURE);
                 }
+
                 for (int i = 0; i < MAX_CLIENTS; i++)
                 {
                     if(clientSockets[i] == 0)
                     {
-                        clientSockets[i] = newSocket;
                         FD_SET(newSocket, &readfds);
+                        clientSockets[i] = newSocket;
                         std::pair<int, RequestParser> clients_elem;
                         clients_elem.first = newSocket;
                         clients_elem.second = RequestParser();
@@ -154,11 +154,11 @@ int main(){
                 sd = clientSockets[i];
                 if(FD_ISSET(sd, &readfds))
                 {
-                    std::cout << "sd is - " << sd << std::endl;
-
-                    int valread = recv(sd, buff, sizeof(buff), 0);
-                    if (valread > 0)
-                    {
+                    char buff[1024];
+                    int valread = recv(sd, buff, sizeof(buff) - 1, 0);
+                    buff[valread] = '\0';
+                    // if (valread > 0)
+                    // {
                         printf("%s", buff);
                         std::string strBuff(buff);
                         try{
@@ -168,24 +168,22 @@ int main(){
                             std::cout << error << std::endl;
                             break ;
                         }
-                        if((clients.at(sd).getMethod() != "POST"))
+                        if(clients.at(sd).getIsReqEnd())
                         {
-                            if(strBuff.find("\r\n\r\n") != std::string::npos)
-                            {
-                                char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
-                                int send_res = send(sd,arr,sizeof(arr),0);
-                                getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
-                                std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
-                                
-                                clients.erase(sd);                           
-                                close(sd);
-                                clientSockets[i] = 0;
-                            }
+                            char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
+                            int send_res = send(sd,arr,sizeof(arr),0);
+                            getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
+                            std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
+                            
+                            clients.erase(sd); 
+                            close(sd);
+                            FD_CLR(sd, &readfds);
+                            clientSockets[i] = 0;
                         }
                         else{
                             
                         }
-                    }
+                    // }
                 }
             }
             // std::map<int, RequestParser>::iterator it = clients.begin();
