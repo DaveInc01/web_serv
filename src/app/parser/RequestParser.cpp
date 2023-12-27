@@ -27,10 +27,7 @@ int   RequestParser::setProperties(){
       setValue("Content-Type", this->content_type);
       if(setValue("Content-Length", this->content_length) != -1)
          this->content_length_int = atoi(content_length.c_str());
-
-
    }
-   
    return 0;
 }
 
@@ -129,6 +126,7 @@ int   RequestParser::launchParse( std::string buff, int len )
                std::pair<std::string, std::string> p_line = ft_split(line, ':');
                request.insert(request.end(), p_line);
             }
+            std::cout << "line - " << line;
          }
          else{
             this->unfinished_line = line;

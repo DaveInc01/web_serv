@@ -138,7 +138,7 @@ int main(){
                 {
                     if(clientSockets[i] == 0)
                     {
-                        FD_SET(newSocket, &readfds);
+                        // FD_SET(newSocket, &readfds);
                         clientSockets[i] = newSocket;
                         std::pair<int, RequestParser> clients_elem;
                         clients_elem.first = newSocket;
@@ -155,11 +155,14 @@ int main(){
                 if(FD_ISSET(sd, &readfds))
                 {
                     char buff[1024];
-                    int valread = recv(sd, buff, sizeof(buff) - 1, 0);
+
+                    int valread = 0;
+                    valread = recv(sd, buff, sizeof(buff) - 1, 0);
                     buff[valread] = '\0';
-                    // if (valread > 0)
-                    // {
-                        printf("%s", buff);
+                    // std::cout << "Valread - " << valread << std::endl;
+                    if (valread > 0)
+                    {
+                        // printf("%s", buff);
                         std::string strBuff(buff);
                         try{
                             clients.at(sd).launchParse(strBuff, strBuff.size());
@@ -183,7 +186,7 @@ int main(){
                         else{
                             
                         }
-                    // }
+                    }
                 }
             }
             // std::map<int, RequestParser>::iterator it = clients.begin();
