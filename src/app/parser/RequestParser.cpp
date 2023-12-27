@@ -126,7 +126,7 @@ int   RequestParser::launchParse( std::string buff, int len )
                std::pair<std::string, std::string> p_line = ft_split(line, ':');
                request.insert(request.end(), p_line);
             }
-            std::cout << "line - " << line;
+            // std::cout << "line - " << line;
          }
          else{
             this->unfinished_line = line;
