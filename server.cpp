@@ -106,7 +106,6 @@ int main(){
         for (int i = 0; i < servers_count; i++)
         {
             FD_SET(serverSockets[i], &tmpReadfds);
-
             max_sd = serverSockets[i];
         }
         for(int i = 0; i < maxClients; i++){
@@ -121,7 +120,7 @@ int main(){
             }
         }
         memcpy(&readfds, &tmpReadfds, sizeof(tmpReadfds));
-        activity = select(max_sd + 1, &readfds, &writefds, NULL, NULL);
+        activity = select(max_sd + 1, &readfds, NULL, NULL, NULL);
         if((activity < 0) && (errno != EINTR))
         {
             perror("Select error");
@@ -157,13 +156,11 @@ int main(){
                 sd = clientSockets[i];
                 if(FD_ISSET(sd, &readfds))
                 {
-                    std::cout << "in fd read \n";
                     valread = recv(sd, buff, sizeof(buff) - 1, 0);
                     buff[valread] = '\0';
-                    // std::cout << "Valread - " << valread << std::endl;
+                    std::cout << buff << std::endl;
                     if (valread > 0)
                     {
-                        printf("Buff len - %lu\n%s\n", sizeof(buff), buff);
                         std::string strBuff(buff);
                         try{
                             clients.at(sd).launchParse(strBuff, strBuff.size());
@@ -184,7 +181,7 @@ int main(){
                             clientSockets[i] = 0;
                         }
                         else{
-                           FD_SET(sd, &writefds); 
+                        //    FD_SET(sd, &writefds); 
                         }
                         FD_CLR(sd, &readfds);
                     }
@@ -218,41 +215,9 @@ int main(){
                             clientSockets[i] = 0;
                             FD_CLR(sd, &writefds);
                         }
-                        // std::string strBuff(buff);
-                        // try{
-                        //     clients.at(sd).launchParse(strBuff, strBuff.size());
-                        // }
-                        // catch(const char* error){
-                        //     std::cout << error << std::endl;
-                        //     break ;
-                        // }
-                        // if(clients.at(sd).getIsReqEnd())
-                        // {
-                        //     char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
-                        //     int send_res = send(sd,arr,sizeof(arr),0);
-                        //     getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
-                        //     std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
-                            
-                        //     clients.erase(sd); 
-                        //     close(sd);
-                        //     FD_CLR(sd, &readfds);
-                        //     clientSockets[i] = 0;
-                        // }
-                        // else{
-                        //    FD_ISSET(sd, &writefds); 
-                        // }
                     }
                 }
             }
-            // std::map<int, RequestParser>::iterator it = clients.begin();
-            
-            // for (it; it != clients.end(); it++)
-            // {
-            //     if(FD_ISSET(it->first, &readfds))
-            //     {
-            //         std::cout << "sd - " << it->first << std::endl;
-            //     }
-            // }
         }
     }
     return 0;

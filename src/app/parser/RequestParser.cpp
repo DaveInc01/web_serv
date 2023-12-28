@@ -96,8 +96,10 @@ int RequestParser::parseQuery()
 
 int   RequestParser::launchParse( std::string buff, int len )
 {
+   std::cout << buff<<std::endl;
    int char_index = 0;
    this->buff_len = len;
+   this->buff.erase();
    this->buff = buff;
    this->http_req.append(buff);
    std::string line;
@@ -143,7 +145,7 @@ int   RequestParser::launchParse( std::string buff, int len )
 std::string RequestParser::getLine(int &index)
 {
    std::string line = "";
-      
+      // std::cout << buff << std::endl;
    while (index < buff_len)
    {
       if(!header_finish)
@@ -164,6 +166,7 @@ std::string RequestParser::getLine(int &index)
             index++;
             return(line);
          }
+         // std::cout << line << std::endl;
       }
       else{
          post_req_body.push_back(this->buff[index]);
