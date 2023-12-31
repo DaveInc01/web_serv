@@ -190,7 +190,9 @@ int main(){
                     {
                         char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
                         int send_res = send(sd,arr,sizeof(arr),0);
-                        std::cout << clients.at(sd).getHttpReq() << std::endl;
+                        std::cout << clients.at(sd).getHttpReq();
+                        // std::cout << "body -\n" << clients.at(sd).getPostReqBody(); 
+
                         getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
                         std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
                         

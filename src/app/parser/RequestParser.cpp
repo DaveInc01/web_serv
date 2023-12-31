@@ -26,7 +26,9 @@ int   RequestParser::setProperties(){
    {
       setValue("Content-Type", this->content_type);
       if(setValue("Content-Length", this->content_length) != -1)
+      {
          this->content_length_int = atoi(content_length.c_str());
+      }
    }
    return 0;
 }
@@ -109,7 +111,8 @@ int   RequestParser::launchParse( std::string buff, int len )
       if(!header_finish)
       {
          /* Unit Line parse was finished */
-         if(header_line_finish){
+         if(this->header_line_finish == 1)
+         {
             /* Start line is empty */
             if(this->method.empty())
             {
@@ -149,35 +152,39 @@ std::string RequestParser::getLine(int &index)
    {
       if(!header_finish)
       {
-         if(!header_line_finish)
-         {
-            line = unfinished_line;
-            line.push_back(this->buff[index]);
-            unfinished_line.erase();
-            this->header_line_finish = 1;
-         }
-         else
-         {
-            line.push_back(this->buff[index]);
-         }
+         line.push_back(this->buff[index]);
+
          if(this->buff[index] == '\n')
          {
             index++;
-            return(line);
+            break ;
          }
-         // std::cout << line << std::endl;
       }
       else{
          post_req_body.push_back(this->buff[index]);
       }
       index++;
    }
-   /* if header line was not finished */
    int line_len = line.length();
-   if((line_len > 0) && (header_finish <= 0))
-      if(line[line_len-1] != '\n')
-         this->header_line_finish = -1;
+   /* if header line was not finished */
+   if(line_len > 0)
+   {
+      if(unfinished_line.empty() != 1)
+      {
+         this->unfinished_line.append(line);
+         line = this->unfinished_line;
+         unfinished_line.erase();
+      }
 
+      if(!header_finish)
+      {
+         if(line.find('\n') != std::string::npos)
+            this->header_line_finish = 1;
+         else
+            this->header_line_finish = -1;
+      }
+      // std::cout << "line - " <<  line << std::endl;
+   }
    return (line);
 }
 
@@ -192,7 +199,7 @@ int   RequestParser::findReqEnd()
          {
             if(this->content_length_int > 0)
             {
-               if(this->post_req_body.length() >= content_length_int)
+               if(this->post_req_body.length() == content_length_int)
                   this->is_req_end = 1;
             }
          }
