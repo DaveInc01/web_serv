@@ -5,7 +5,7 @@ SRC_PARSER = $(wildcard ./src/app/parser/*.cpp)
 ALL_SRC = $(SRC_PARSER) $(SRC_ROOT)
 OBJ=$(ALL_SRC:.cpp=.o)
 
-CPPFLAGS = -I./src/app/parser #-Wall -Wextra -Werror -std=c++98
+CPPFLAGS = #-I./src/app/parser #-Wall -Wextra -Werror -std=c++98
 
 RM = rm -rf
 

@@ -15,6 +15,7 @@ public:
    std::string getContentType();
    std::string getContentLength();
    std::string getPostReqBody();
+   std::string getHttpReq();
    int         getIsReqEnd();
 
 protected:

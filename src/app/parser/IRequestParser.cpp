@@ -31,6 +31,11 @@ std::string IRequestParser::getPostReqBody()
     return this->post_req_body;
 }
 
+std::string IRequestParser::getHttpReq()
+{
+    return this->http_req;
+}
+
 int IRequestParser::getIsReqEnd()
 {
     return this->is_req_end;

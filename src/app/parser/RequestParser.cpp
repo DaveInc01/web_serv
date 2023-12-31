@@ -96,7 +96,6 @@ int RequestParser::parseQuery()
 
 int   RequestParser::launchParse( std::string buff, int len )
 {
-   std::cout << buff<<std::endl;
    int char_index = 0;
    this->buff_len = len;
    this->buff.erase();
