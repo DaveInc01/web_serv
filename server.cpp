@@ -14,12 +14,14 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-#include "src/app/parser/RequestParser.hpp"
+#include "request/RequestParser.hpp"
+#include "response/ResponseParser.hpp"
+
 #include <fcntl.h>
 #define MAX_CLIENTS 10
 // #define servers_count 2
 struct sockaddr_in srv;
-fd_set readfds, writefds, fe, tmpReadfds;
+fd_set readfds, writefds, tmpReadfds, tmpWritefds;
 
 struct config_t {
     int ip;
@@ -39,9 +41,11 @@ int main(){
     srv2_conf.buff_size = 1024;
     srv2_conf.port = 7009;
     configs_v.push_back(srv2_conf);
-    char buff[20];
+    char buff[40];
 
-    std::map<int, RequestParser> clients;
+    std::map<int, RequestParser> clientsReq;
+    std::map<int, ResponseParser> clientsResp;
+
 
     int servers_count = configs_v.size();
     int serverSockets[servers_count];
@@ -98,6 +102,8 @@ int main(){
     }
 
     FD_ZERO(&readfds);
+    FD_ZERO(&writefds);
+
     // FD_ZERO(&writefds);
 
     for (int i = 0; i < servers_count; i++)
@@ -123,9 +129,11 @@ int main(){
     while (true)
     {
         tmpReadfds = readfds;
-        activity = select(max_sd + 1, &tmpReadfds, NULL, NULL, NULL);
+        tmpWritefds = writefds;
+        activity = select(max_sd + 1, &tmpReadfds, &tmpWritefds, NULL, NULL);
         if((activity < 0) && (errno != EINTR))
         {
+            std::cout << "activity - " << activity << std::endl;
             perror("Select error");
         }
         for(int i = 0; i < servers_count; i++)
@@ -153,10 +161,10 @@ int main(){
                     FD_SET(newSocket, &readfds);
                     fcntl(newSocket, F_SETFL, O_NONBLOCK);
                     clientSockets[i] = newSocket;
-                    std::pair<int, RequestParser> clients_elem;
-                    clients_elem.first = newSocket;
-                    clients_elem.second = RequestParser();
-                    clients.insert(clients_elem);
+                    std::pair<int, RequestParser> clients_req_elem;
+                    clients_req_elem.first = newSocket;
+                    clients_req_elem.second = RequestParser();
+                    clientsReq.insert(clients_req_elem);
                     if(newSocket > max_sd)
                     {
                         max_sd = newSocket;
@@ -180,64 +188,45 @@ int main(){
                 {
                     std::string strBuff(buff);
                     try{
-                        clients.at(sd).launchParse(strBuff, strBuff.size());
+                        clientsReq.at(sd).launchParse(strBuff, strBuff.size());
                     }
                     catch(const char* error){
                         std::cout << error << std::endl;
                         break ;
                     }
-                    if(clients.at(sd).getIsReqEnd())
+                    if(clientsReq.at(sd).getIsReqEnd())
                     {
-                        char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
-                        int send_res = send(sd,arr,sizeof(arr),0);
-                        std::cout << clients.at(sd).getHttpReq();
-                        // std::cout << "body -\n" << clients.at(sd).getPostReqBody(); 
-
-                        getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
-                        std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
-                        
-                        clients.erase(sd); 
-                        close(sd);
-                        clientSockets[i] = 0;
+                        FD_SET(sd, &writefds);
                         FD_CLR(sd, &readfds);
+                        FD_CLR(sd, &tmpReadfds);
+
+                        std::pair<int, ResponseParser> clients_resp_elem;
+                        clients_resp_elem.first = sd;
+                        clients_resp_elem.second = ResponseParser(clientsReq.at(sd));
+                        clientsResp.insert(clients_resp_elem);
+                        std::cout << "ALYO\n";
+                        // clientSockets[i] = 0;
                     }
-                    else{
-                        // continue;
-                    //    FD_SET(sd, &writefds); 
-                    }
+                    continue;
                 }
             }
-            // else if(FD_ISSET(sd, &writefds))
-            // {
-            //     std::cout << "IN FD_SET WRITE-\n";
-            //     valread = recv(sd, buff, sizeof(buff) - 1, 0);
-            //     buff[valread] = '\0';
-            //     if (valread > 0)
-            //     {
-            //         std::cout << "IN WRITE FD\n";
-            //         // printf("%s", buff);
-            //         std::string strBuff(buff);
-            //         try{
-            //             clients.at(sd).launchParse(strBuff, strBuff.size());
-            //         }
-            //         catch(const char* error){
-            //             std::cout << error << std::endl;
-            //             break ;
-            //         }
-            //         if(clients.at(sd).getIsReqEnd())
-            //         {
-            //             char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
-            //             int send_res = send(sd,arr,sizeof(arr),0);
-            //             getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
-            //             std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
-                        
-            //             clients.erase(sd); 
-            //             close(sd);
-            //             clientSockets[i] = 0;
-            //             FD_CLR(sd, &writefds);
-            //         }
-            //     }
-            // }
+            else if(FD_ISSET(sd, &tmpWritefds))
+            {
+                char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
+                int send_res = send(sd,arr,sizeof(arr),0);
+                std::cout << clientsReq.at(sd).getHttpReq();
+                getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
+                std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
+                
+                clientsReq.erase(sd); 
+                FD_CLR(sd, &writefds);
+                FD_CLR(sd, &tmpWritefds);
+                FD_CLR(sd, &readfds);
+                FD_CLR(sd, &tmpReadfds);
+                close(sd);
+                clientSockets[i] = 0;
+            }
+           
         }
     }
     return 0;

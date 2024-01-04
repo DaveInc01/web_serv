@@ -1,9 +1,7 @@
-#ifndef REQUESTPARSER
-#define REQUESTPARSER
+#pragma once
 
 #include "IRequestParser.hpp"
  
-
 class RequestParser : public IRequestParser {
 public:
       RequestParser();
@@ -20,6 +18,3 @@ public:
       int   findReqEnd();
       std::string getLine(int &);
 };
-
-
-#endif

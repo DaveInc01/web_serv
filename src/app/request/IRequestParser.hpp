@@ -1,5 +1,4 @@
-#ifndef IREQUESTPARSER
-#define IREQUESTPARSER
+#pragma once
 
 #include <map>
 #include <iostream>
@@ -43,5 +42,3 @@ protected:
 std::string& rtrim(std::string& s);
 std::string& ltrim(std::string& s);
 std::pair<std::string, std::string> ft_split(std::string s, char del);
-
-#endif
