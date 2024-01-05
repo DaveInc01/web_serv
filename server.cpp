@@ -18,7 +18,7 @@
 #include "response/ResponseParser.hpp"
 
 #include <fcntl.h>
-#define MAX_CLIENTS 10
+#define MAX_CLIENTS 20
 // #define servers_count 2
 struct sockaddr_in srv;
 fd_set readfds, writefds, tmpReadfds, tmpWritefds;
@@ -103,6 +103,8 @@ int main(){
 
     FD_ZERO(&readfds);
     FD_ZERO(&writefds);
+    FD_ZERO(&tmpReadfds);
+    FD_ZERO(&tmpWritefds);
 
     // FD_ZERO(&writefds);
 
@@ -130,7 +132,11 @@ int main(){
     {
         tmpReadfds = readfds;
         tmpWritefds = writefds;
-        activity = select(max_sd + 1, &tmpReadfds, &tmpWritefds, NULL, NULL);
+        std::cout << "maxsd - " << max_sd << std::endl;
+        do {
+            activity = select(max_sd + 1, &tmpReadfds, &tmpWritefds, NULL, NULL);
+        } while (activity == -1);
+        // activity = select(max_sd + 1, &tmpReadfds, &tmpWritefds, NULL, NULL);
         if((activity < 0) && (errno != EINTR))
         {
             std::cout << "activity - " << activity << std::endl;
@@ -152,8 +158,8 @@ int main(){
                 }
             }
         }
-        // if(FD_ISSET(newSocket, &readfds) == 0)
-        // {
+        if(FD_ISSET(newSocket, &readfds) == 0)
+        {
             for (int i = 0; i < MAX_CLIENTS; i++)
             {
                 if(clientSockets[i] == 0)
@@ -172,9 +178,9 @@ int main(){
                     break;
                 }
             }
-        // }
+        }
 
-        for(int i = 0; i < max_sd; i++)
+        for(int i = 0; i <= max_sd; i++)
         {
             int valread;
             sd = clientSockets[i];
@@ -204,9 +210,10 @@ int main(){
                         clients_resp_elem.first = sd;
                         clients_resp_elem.second = ResponseParser(clientsReq.at(sd));
                         clientsResp.insert(clients_resp_elem);
-                        std::cout << "ALYO\n";
-                        // clientSockets[i] = 0;
+                        
                     }
+                    FD_ZERO(&tmpReadfds);
+                    FD_ZERO(&tmpWritefds);
                     continue;
                 }
             }
@@ -219,11 +226,14 @@ int main(){
                 std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
                 
                 clientsReq.erase(sd); 
+                close(sd);
                 FD_CLR(sd, &writefds);
                 FD_CLR(sd, &tmpWritefds);
+                FD_ZERO(&tmpWritefds);
+                FD_ZERO(&tmpReadfds);
                 FD_CLR(sd, &readfds);
                 FD_CLR(sd, &tmpReadfds);
-                close(sd);
+                // max_sd-=1;
                 clientSockets[i] = 0;
             }
            
