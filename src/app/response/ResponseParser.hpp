@@ -8,6 +8,7 @@ class ResponseParser : public IResponseParser
 public:
     ResponseParser(RequestParser);
     ResponseParser();
+    int launchResponse();
 };
 
 #endif

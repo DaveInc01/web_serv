@@ -18,7 +18,7 @@
 #include "response/ResponseParser.hpp"
 
 #include <fcntl.h>
-#define MAX_CLIENTS 20
+#define MAX_CLIENTS 5
 // #define servers_count 2
 struct sockaddr_in srv;
 fd_set readfds, writefds, tmpReadfds, tmpWritefds;
@@ -35,11 +35,11 @@ int main(){
     std::vector<config_t> configs_v;
     config_t srv1_conf;
     srv1_conf.buff_size = 1024;
-    srv1_conf.port = 8009;
+    srv1_conf.port = 8008;
     configs_v.push_back(srv1_conf);
     config_t srv2_conf;
     srv2_conf.buff_size = 1024;
-    srv2_conf.port = 7009;
+    srv2_conf.port = 7008;
     configs_v.push_back(srv2_conf);
     char buff[40];
 
@@ -56,7 +56,7 @@ int main(){
 
     for (int i = 0; i < servers_count; i++)
     {
-
+        
         serverSockets[i] = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
         if (serverSockets[i] < 0)
@@ -219,6 +219,7 @@ int main(){
             }
             else if(FD_ISSET(sd, &tmpWritefds))
             {
+                // if(clientsResp.at(sd).is_finsh)
                 char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
                 int send_res = send(sd,arr,sizeof(arr),0);
                 std::cout << clientsReq.at(sd).getHttpReq();
@@ -227,6 +228,7 @@ int main(){
                 
                 clientsReq.erase(sd); 
                 close(sd);
+
                 FD_CLR(sd, &writefds);
                 FD_CLR(sd, &tmpWritefds);
                 FD_ZERO(&tmpWritefds);
