@@ -3,10 +3,10 @@
 
 #include <string>
 
-class Config{
+class AConfig{
 public:
-    Config(){};
-private:
+    AConfig(){};
+protected:
     int ip;
     int port;
     int buff_size;

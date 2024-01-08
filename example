@@ -1,4 +1,1 @@
-cument
-Accept-Encoding: gzip, deflate, br
-Accept-Language: en-GB,en-US;q=0.9,en;q=0.8,ru;q=0.7
-
+curl -X POST http://127.0.0.1:8008 -H "Transfer-Encoding: chunked" -d $'5\r\nHello\r\n7\r\n, World!\r\n0\r\n\r\n'

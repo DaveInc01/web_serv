@@ -29,6 +29,7 @@ int   RequestParser::setProperties(){
       {
          this->content_length_int = atoi(content_length.c_str());
       }
+      setValue("Transfer-Encoding", this->transfer_encoding);
    }
    return 0;
 }
@@ -203,8 +204,12 @@ int   RequestParser::findReqEnd()
                   this->is_req_end = 1;
             }
          }
-         else{
-            /* create chuked req end logic */
+         else if(this->transfer_encoding == "chunked"){
+            /* for chunked request */
+            if(this->http_req.find("0\r\n\r\n", http_req.size() - 5) != std::string::npos)
+            {
+               this->is_req_end = 1;
+            }
          }
       }
    }
