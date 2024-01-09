@@ -7,7 +7,6 @@ RequestParser::RequestParser(){
    content_length_int = 0;
 };
 
-
 int   RequestParser::setValue(std::string key, std::string &obj_property)
 {
    std::string value;

@@ -2,6 +2,9 @@
 
 #define MAX_CLIENTS 5
 
+std::map<int, RequestParser> Server::clientsReq;
+std::map<int, ResponseParser> Server::clientsResp;
+
 struct config_t {
     int ip;
     int port;
@@ -25,15 +28,28 @@ int Server::launchServer()
     srv2_conf.port = 7008;
     configs_v.push_back(srv2_conf);
     char buff[20];
-
-    std::map<int, RequestParser> clientsReq;
-    std::map<int, ResponseParser> clientsResp;
-
     int servers_count = configs_v.size();
     int serverSockets[servers_count];
     int activity, max_sd, sd, maxClients = MAX_CLIENTS;
     int nRet = 0;
     int addrlen, clientSockets[MAX_CLIENTS];
+
+    /* my configs */
+
+    Config firstServ;
+    Location firstLoc_1;
+    Location firstLoc_2;
+    Config secondServ;
+    Location secondLoc_1;
+    Location secondLoc_2;
+
+    firstServ.listen_ip = "127.0.0.1";
+    firstServ.port = 8008;
+    secondServ.listen_ip = "127.0.0.1";
+    secondServ.port = 7008;
+    std::pair<std::string, Location>  
+
+
 
     for (int i = 0; i < servers_count; i++)
     {
@@ -197,7 +213,7 @@ int Server::launchServer()
                     continue;
                 }
                 else if(valread == 0){
-                    throw (400);
+                    /* 400 code */
                 }
             }
             else if(FD_ISSET(sd, &tmpWritefds))
