@@ -18,16 +18,17 @@
 #include <fcntl.h>
 #include "request/RequestParser.hpp"
 #include "response/ResponseParser.hpp"
-#include "config/AConfig.hpp"
+#include "config/AllConfigs.hpp"
 
 class Config;
 
 class Server{
 public:
     Server();
+    static int launchConfig();
     static int launchServer();
     std::vector<Config> configs_vector;
-    std::map<int, Config> configs_map;
+    static std::map<int, Config*> configs_map;
     static std::map<int, RequestParser> clientsReq;
     static std::map<int, ResponseParser> clientsResp;
     // static int upServer();

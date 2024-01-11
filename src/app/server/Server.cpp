@@ -4,6 +4,7 @@
 
 std::map<int, RequestParser> Server::clientsReq;
 std::map<int, ResponseParser> Server::clientsResp;
+std::map<int, Config*> Server::configs_map;
 
 struct config_t {
     int ip;
@@ -12,6 +13,14 @@ struct config_t {
     std::string location;
     std::string root;
 };
+
+int Server::launchConfig(){
+    AllConfigs k;
+    k.readConff();
+    k.print_AllServs();
+    Server::configs_map = k._AllServs;
+    return 0;
+}
 
 int Server::launchServer()
 {
@@ -36,18 +45,23 @@ int Server::launchServer()
 
     /* my configs */
 
-    Config firstServ;
-    Location firstLoc_1;
-    Location firstLoc_2;
-    Config secondServ;
-    Location secondLoc_1;
-    Location secondLoc_2;
+    // Config firstServ;
+    // Location firstLoc_1;
+    // Location firstLoc_2;
+    // Config secondServ;
+    // Location secondLoc_1;
+    // Location secondLoc_2;
 
-    firstServ.listen_ip = "127.0.0.1";
-    firstServ.port = 8008;
-    secondServ.listen_ip = "127.0.0.1";
-    secondServ.port = 7008;
-    std::pair<std::string, Location>  
+    // firstServ.listen_ip = "127.0.0.1";
+    // firstServ.port = 8008;
+    // secondServ.listen_ip = "127.0.0.1";
+    // secondServ.port = 7008;
+    // std::pair<std::string, Location>  
+
+    // for (int i = 0; i < Server::configs_map.size(); i++)
+    // {
+    //     for(int j = 0; j < Server::configs_map[i]->directives[j])
+    // }
 
 
 
