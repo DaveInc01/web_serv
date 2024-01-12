@@ -8,12 +8,12 @@ int main(){
     {
         // std::cout << "hhhhh" << std::endl;
         std::cerr << e.what() << std::endl;;
-        return (0);
+        // return (0);
     }
     catch(...)
     {
         std::cout << "hhhhh" << std::endl;
-        return (0);
+        // return (0);
         // std::cerr << e.what() << std::endl;;
     }
     Server::launchServer();

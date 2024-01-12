@@ -152,12 +152,12 @@ void AllConfigs::dir_is_valid(std::string dir, int from)
 }
 void AllConfigs::readConff()
 {
-    std::ifstream fin("config2.conf");
+    std::ifstream fin("src/app/config/config2.conf");
     std::string line;
     std::string full;
     std::string path;
     std::vector<std::string> fv;
-    fin >> line;  ///
+    fin >> line;
     full = line + " ";
     if(line != "server")
     {

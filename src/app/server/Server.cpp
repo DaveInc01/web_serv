@@ -42,7 +42,7 @@ int Server::launchServer()
     int activity, max_sd, sd, maxClients = MAX_CLIENTS;
     int nRet = 0;
     int addrlen, clientSockets[MAX_CLIENTS];
-
+    
     /* my configs */
 
     // Config firstServ;
@@ -62,8 +62,8 @@ int Server::launchServer()
     // {
     //     for(int j = 0; j < Server::configs_map[i]->directives[j])
     // }
-
-
+    std::cout << "The map size is -" << Server::configs_map.size() << std::endl;
+    Server::getServersCount();
 
     for (int i = 0; i < servers_count; i++)
     {
@@ -252,6 +252,26 @@ int Server::launchServer()
                 clientSockets[i] = 0;
             }
            
+        }
+    }
+    return 0;
+}
+
+int Server::getServersCount()
+{   
+    int p = 8000;
+    std::map<int, Config*>::iterator it;
+    for (it = configs_map.begin(); it != configs_map.end(); ++it)
+    {
+        it->second->_port = p++;
+    }
+    std::vector<int> unique_ports;
+    for (it = configs_map.begin(); it != configs_map.end(); ++it)
+    {
+        /* Check unique ports and add to vector */
+        if(std::find(unique_ports.begin(), unique_ports.end(), it->second->_port) == unique_ports.end())
+        {
+            std::cout << "Port Number - " << (it->second->_port) << std::endl;
         }
     }
     return 0;

@@ -27,10 +27,12 @@ public:
     Server();
     static int launchConfig();
     static int launchServer();
-    std::vector<Config> configs_vector;
+    // std::vector<Config> configs_vector;
     static std::map<int, Config*> configs_map;
     static std::map<int, RequestParser> clientsReq;
     static std::map<int, ResponseParser> clientsResp;
+
+    static int getServersCount();
     // static int upServer();
 private:
     int servers_count;
