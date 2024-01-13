@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <algorithm> 
 #include "Directives.hpp"
 
 // typedef std::vector<std::pair<std::string,  std::vector<std::string>>> Vec;

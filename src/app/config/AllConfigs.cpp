@@ -1,5 +1,4 @@
 #include "AllConfigs.hpp"
-
 AllConfigs::AllConfigs()
 {
     const char* directiv_list[] = {"server_name", "listen", "root", "index", "autoindex", "error_page", "client_max_body_size", "cgi", "allow_methods", "upload_dir", "return", "upload_path", "methods"};

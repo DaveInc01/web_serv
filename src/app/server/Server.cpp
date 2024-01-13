@@ -1,13 +1,11 @@
 #include "Server.hpp"
 
-#define MAX_CLIENTS 5
-
-std::map<int, RequestParser> Server::clientsReq;
-std::map<int, ResponseParser> Server::clientsResp;
-std::map<int, Config*> Server::configs_map;
+Server::Server(){
+    this->MAX_CLIENTS = 5;
+}
 
 struct config_t {
-    int ip;
+    char* host;
     int port;
     int buff_size;
     std::string location;
@@ -17,53 +15,30 @@ struct config_t {
 int Server::launchConfig(){
     AllConfigs k;
     k.readConff();
-    k.print_AllServs();
+    // k.print_AllServs();
     Server::configs_map = k._AllServs;
     return 0;
 }
 
 int Server::launchServer()
 {
-    struct sockaddr_in srv;
-    fd_set readfds, writefds, tmpReadfds, tmpWritefds;
-
     std::vector<config_t> configs_v;
     config_t srv1_conf;
     srv1_conf.buff_size = 1024;
+    srv1_conf.host = (char *)"127.0.0.1";
     srv1_conf.port = 8008;
     configs_v.push_back(srv1_conf);
     config_t srv2_conf;
+    srv2_conf.host = (char *)"127.0.0.2";
     srv2_conf.buff_size = 1024;
     srv2_conf.port = 7008;
     configs_v.push_back(srv2_conf);
-    char buff[20];
+    char buff[200];
     int servers_count = configs_v.size();
     int serverSockets[servers_count];
-    int activity, max_sd, sd, maxClients = MAX_CLIENTS;
+    int activity, max_sd, sd;
     int nRet = 0;
-    int addrlen, clientSockets[MAX_CLIENTS];
-    
-    /* my configs */
-
-    // Config firstServ;
-    // Location firstLoc_1;
-    // Location firstLoc_2;
-    // Config secondServ;
-    // Location secondLoc_1;
-    // Location secondLoc_2;
-
-    // firstServ.listen_ip = "127.0.0.1";
-    // firstServ.port = 8008;
-    // secondServ.listen_ip = "127.0.0.1";
-    // secondServ.port = 7008;
-    // std::pair<std::string, Location>  
-
-    // for (int i = 0; i < Server::configs_map.size(); i++)
-    // {
-    //     for(int j = 0; j < Server::configs_map[i]->directives[j])
-    // }
-    std::cout << "The map size is -" << Server::configs_map.size() << std::endl;
-    Server::getServersCount();
+    int addrlen, clientSockets[this->MAX_CLIENTS];
 
     for (int i = 0; i < servers_count; i++)
     {
@@ -77,9 +52,10 @@ int Server::launchServer()
             std::cout << "socket has opened on port " << configs_v[i].port << std::endl;
         }
         srv.sin_family = AF_INET;
+        std::cout << configs_v[i].port << std::endl;
         srv.sin_port = htons(configs_v[i].port);
-        srv.sin_addr.s_addr = INADDR_ANY;
-        // inet_pton(AF_INET, "10.12.0.1", &srv.sin_addr);
+        inet_pton(AF_INET, "0.0.0.0", &srv.sin_addr);
+        // inet_pton(AF_INET, "127.0.0.1", &srv.sin_addr);
         memset(&(srv.sin_zero), 0, 8);
         addrlen = sizeof(srv);
          int l = 1;
@@ -125,7 +101,7 @@ int Server::launchServer()
             max_sd = serverSockets[i];
     }
 
-    for(int i = 0; i < maxClients; i++){
+    for(int i = 0; i < MAX_CLIENTS; i++){
         sd = clientSockets[i];
         if(sd > 0)
         {
@@ -137,7 +113,7 @@ int Server::launchServer()
         }
     }
 
-    int newSocket;
+    int newSocket = 0;
     while (true)
     {
         tmpReadfds = readfds;
@@ -176,6 +152,7 @@ int Server::launchServer()
                     FD_SET(newSocket, &readfds);
                     fcntl(newSocket, F_SETFL, O_NONBLOCK);
                     clientSockets[i] = newSocket;
+                    std::cout << newSocket << std::endl;
                     std::pair<int, RequestParser> clients_req_elem;
                     clients_req_elem.first = newSocket;
                     clients_req_elem.second = RequestParser();
@@ -189,7 +166,7 @@ int Server::launchServer()
             }
         }
 
-        for(int i = 0; i <= max_sd; i++)
+        for(int i = 0; i < MAX_CLIENTS; i++)
         {
             int valread;
             sd = clientSockets[i];

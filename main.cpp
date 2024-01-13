@@ -1,8 +1,9 @@
 #include "server/Server.hpp"
 
 int main(){
+    Server server1;
     try{
-        Server::launchConfig();
+        server1.launchConfig();
     }
     catch(const std::exception& e)
     {
@@ -16,7 +17,16 @@ int main(){
         // return (0);
         // std::cerr << e.what() << std::endl;;
     }
-    Server::launchServer();
-
+    try{
+        server1.launchServer();
+    }
+    catch(std::string e)
+    {
+        std::cout << e << std::endl;
+    }
+     catch(...)
+    {
+        std::cout << "Some error" << std::endl;
+    }
     return 0;
 }

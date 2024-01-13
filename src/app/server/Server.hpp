@@ -25,17 +25,21 @@ class Config;
 class Server{
 public:
     Server();
-    static int launchConfig();
-    static int launchServer();
+    int launchConfig();
+    int launchServer();
     // std::vector<Config> configs_vector;
-    static std::map<int, Config*> configs_map;
-    static std::map<int, RequestParser> clientsReq;
-    static std::map<int, ResponseParser> clientsResp;
+    std::map<int, Config*> configs_map;
+    std::map<int, RequestParser> clientsReq;
+    std::map<int, ResponseParser> clientsResp;
 
-    static int getServersCount();
+    int getServersCount();
     // static int upServer();
+public:
+    int MAX_CLIENTS;
+    struct sockaddr_in srv;
+    fd_set readfds, writefds, tmpReadfds, tmpWritefds;
 private:
-    int servers_count;
+    // int servers_count;
     // std::vector<int> server_sockets;
     // std::vector<Config> configs;
 };
