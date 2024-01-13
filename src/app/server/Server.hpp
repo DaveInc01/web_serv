@@ -21,21 +21,29 @@
 #include "config/AllConfigs.hpp"
 
 class Config;
+class AllConfigs;
 
 class Server{
 public:
     Server();
-    int launchConfig();
+    Server( std::map<int, Config*> );
+    // int launchConfig();
     int launchServer();
     // std::vector<Config> configs_vector;
     std::map<int, Config*> configs_map;
     std::map<int, RequestParser> clientsReq;
     std::map<int, ResponseParser> clientsResp;
-
-    int getServersCount();
+    
+    std::vector<int> unique_ports;
+    int getServersCountFromConf();
     // static int upServer();
+
 public:
+    int servers_count;
+    std::vector<int> server_sockets;
+    int buff_size;
     int MAX_CLIENTS;
+    int max_sd;
     struct sockaddr_in srv;
     fd_set readfds, writefds, tmpReadfds, tmpWritefds;
 private:

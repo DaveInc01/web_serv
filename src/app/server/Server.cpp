@@ -1,71 +1,47 @@
 #include "Server.hpp"
 
-Server::Server(){
+Server::Server( std::map<int, Config*> configs)
+{
+    this->configs_map = configs;
     this->MAX_CLIENTS = 5;
-}
-
-struct config_t {
-    char* host;
-    int port;
-    int buff_size;
-    std::string location;
-    std::string root;
-};
-
-int Server::launchConfig(){
-    AllConfigs k;
-    k.readConff();
-    // k.print_AllServs();
-    Server::configs_map = k._AllServs;
-    return 0;
+    buff_size = 200;
+    max_sd = 0;
+    /* find unique ports and init to servers_count */
+    servers_count = getServersCountFromConf();
+    server_sockets.resize(servers_count);
 }
 
 int Server::launchServer()
 {
-    std::vector<config_t> configs_v;
-    config_t srv1_conf;
-    srv1_conf.buff_size = 1024;
-    srv1_conf.host = (char *)"127.0.0.1";
-    srv1_conf.port = 8008;
-    configs_v.push_back(srv1_conf);
-    config_t srv2_conf;
-    srv2_conf.host = (char *)"127.0.0.2";
-    srv2_conf.buff_size = 1024;
-    srv2_conf.port = 7008;
-    configs_v.push_back(srv2_conf);
-    char buff[200];
-    int servers_count = configs_v.size();
-    int serverSockets[servers_count];
-    int activity, max_sd, sd;
+    char buff[buff_size];
+    int activity, sd;
     int nRet = 0;
     int addrlen, clientSockets[this->MAX_CLIENTS];
-
     for (int i = 0; i < servers_count; i++)
     {
-        serverSockets[i] = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        server_sockets[i] = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-        if (serverSockets[i] < 0)
+        if (server_sockets.at(i) < 0)
         {
             std::cout << "The socket not oppened" << std::endl;
         }
         else{
-            std::cout << "socket has opened on port " << configs_v[i].port << std::endl;
+            std::cout << "socket has opened on port " << unique_ports.at(i) << std::endl;
         }
         srv.sin_family = AF_INET;
-        std::cout << configs_v[i].port << std::endl;
-        srv.sin_port = htons(configs_v[i].port);
+        srv.sin_port = htons(unique_ports.at(i));
         inet_pton(AF_INET, "0.0.0.0", &srv.sin_addr);
-        // inet_pton(AF_INET, "127.0.0.1", &srv.sin_addr);
         memset(&(srv.sin_zero), 0, 8);
         addrlen = sizeof(srv);
-         int l = 1;
-        setsockopt(serverSockets[i], SOL_SOCKET, SO_REUSEADDR, &l, sizeof(l));
-        if (fcntl(serverSockets[i], F_SETFL, O_NONBLOCK, FD_CLOEXEC) < 0)
+        int l = 1;
+        setsockopt(server_sockets.at(i), SOL_SOCKET, SO_REUSEADDR, &l, sizeof(l));
+        if (fcntl(server_sockets.at(i), F_SETFL, O_NONBLOCK, FD_CLOEXEC) < 0)
         {
-            std::cout << "Fcntl error\n";
-            exit(1);
+            // std::cout << "Fcntl error\n";
+            // server_sockets.erase(server_sockets.begin() + i);
+            throw("Fcntl error");
         }
-        nRet = bind(serverSockets[i], (sockaddr*)&srv, sizeof(sockaddr));
+        nRet = bind(server_sockets.at(i), (sockaddr*)&srv, sizeof(sockaddr));
         if(nRet < 0)
         {
             std::cout << "Fail to bind to loacal port\n";
@@ -75,16 +51,16 @@ int Server::launchServer()
             std::cout << "The socket bined successfully\n\n\n";
         }
 
-        nRet = listen(serverSockets[i], 5);
+        nRet = listen(server_sockets.at(i), MAX_CLIENTS);
         if(nRet < 0)
         {
             std::cout << "max count of connections was full(5)\n";
             exit(EXIT_FAILURE);
         }
+    }
 
-        for(int i = 0; i < MAX_CLIENTS; i++){
-            clientSockets[i] = 0;
-        }
+    for(int i = 0; i < MAX_CLIENTS; i++){
+        clientSockets[i] = 0;
     }
 
     FD_ZERO(&readfds);
@@ -96,9 +72,9 @@ int Server::launchServer()
 
     for (int i = 0; i < servers_count; i++)
     {
-        FD_SET(serverSockets[i], &readfds);
-        // if(serverSockets[i] > max_sd)
-            max_sd = serverSockets[i];
+        FD_SET(server_sockets.at(i), &readfds);
+        if(server_sockets.at(i) > max_sd)
+            max_sd = server_sockets.at(i);
     }
 
     for(int i = 0; i < MAX_CLIENTS; i++){
@@ -118,10 +94,11 @@ int Server::launchServer()
     {
         tmpReadfds = readfds;
         tmpWritefds = writefds;
+
         do {
             activity = select(max_sd + 1, &tmpReadfds, &tmpWritefds, NULL, NULL);
         } while (activity == -1);
-        // activity = select(max_sd + 1, &tmpReadfds, &tmpWritefds, NULL, NULL);
+
         if((activity < 0) && (errno != EINTR))
         {
             std::cout << "activity - " << activity << std::endl;
@@ -129,10 +106,10 @@ int Server::launchServer()
         }
         for(int i = 0; i < servers_count; i++)
         {
-            if (FD_ISSET(serverSockets[i], &tmpReadfds) != 0)
+            if (FD_ISSET(server_sockets.at(i), &tmpReadfds) != 0)
             {
                 /* new conection has come */ 
-                if ((newSocket = accept(serverSockets[i], (struct sockaddr*)&srv, (socklen_t*)&addrlen)) < 0) {
+                if ((newSocket = accept(server_sockets.at(i), (struct sockaddr*)&srv, (socklen_t*)&addrlen)) < 0) {
                     std::cout << "Socket is returning - " << newSocket <<std::endl;
                     perror("Accept failed");
                     exit(EXIT_FAILURE);
@@ -234,7 +211,7 @@ int Server::launchServer()
     return 0;
 }
 
-int Server::getServersCount()
+int Server::getServersCountFromConf()
 {   
     int p = 8000;
     std::map<int, Config*>::iterator it;
@@ -242,14 +219,13 @@ int Server::getServersCount()
     {
         it->second->_port = p++;
     }
-    std::vector<int> unique_ports;
     for (it = configs_map.begin(); it != configs_map.end(); ++it)
     {
-        /* Check unique ports and add to vector */
+        /* Check unique ports and add to vector from Server class */
         if(std::find(unique_ports.begin(), unique_ports.end(), it->second->_port) == unique_ports.end())
         {
-            std::cout << "Port Number - " << (it->second->_port) << std::endl;
+            unique_ports.push_back(it->second->_port);
         }
     }
-    return 0;
+    return (int) unique_ports.size();
 }

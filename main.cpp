@@ -1,9 +1,9 @@
 #include "server/Server.hpp"
 
 int main(){
-    Server server1;
+    AllConfigs configs;
     try{
-        server1.launchConfig();
+        configs.readConff();
     }
     catch(const std::exception& e)
     {
@@ -18,6 +18,7 @@ int main(){
         // std::cerr << e.what() << std::endl;;
     }
     try{
+        Server server1(configs._AllServs);
         server1.launchServer();
     }
     catch(std::string e)
