@@ -6,6 +6,8 @@
 class IResponseParser{
 public:
     int             setFinish();
+    
+    Directives* corresponding_location;
 protected:
     RequestParser   request;
     

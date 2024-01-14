@@ -36,16 +36,22 @@ public:
     
     std::vector<int> unique_ports;
     int getServersCountFromConf();
-    // static int upServer();
+    int upServer(int s, int p);
+    int setServSockets();
+    void httpIO();
 
+    Directives* getCorrespondingLoc(const RequestParser &);
 public:
     int servers_count;
     std::vector<int> server_sockets;
+    std::vector<int> client_sockets;
     int buff_size;
     int MAX_CLIENTS;
     int max_sd;
+    int addrlen;
     struct sockaddr_in srv;
     fd_set readfds, writefds, tmpReadfds, tmpWritefds;
+
 private:
     // int servers_count;
     // std::vector<int> server_sockets;

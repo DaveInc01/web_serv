@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IRequestParser.hpp"
- 
+
 class RequestParser : public IRequestParser {
 public:
       RequestParser();
@@ -16,5 +16,6 @@ public:
       int   setProperties();
       int   setValue(std::string, std::string &);
       int   findReqEnd();
+      
       std::string getLine(int &);
 };
