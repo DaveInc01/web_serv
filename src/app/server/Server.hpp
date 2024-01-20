@@ -39,8 +39,7 @@ public:
     int upServer(int s, int p);
     int setServSockets();
     void httpIO();
-
-    Directives* getCorrespondingLoc(const RequestParser &);
+    int getCorrespondingLoc(RequestParser &);
 public:
     int servers_count;
     std::vector<int> server_sockets;

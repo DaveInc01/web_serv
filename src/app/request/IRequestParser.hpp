@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include "config/AllConfigs.hpp"
 
 class IRequestParser {
 public:
@@ -16,6 +17,8 @@ public:
    std::string getPostReqBody();
    std::string getHttpReq();
    int         getIsReqEnd();
+
+   
 
 protected:
    std::string method;

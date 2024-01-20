@@ -7,7 +7,8 @@ class IResponseParser{
 public:
     int             setFinish();
     
-    Directives* corresponding_location;
+    /* Location which should be using for serveing data */
+    Directives*     corresponding_location;
 protected:
     RequestParser   request;
     

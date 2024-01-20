@@ -221,9 +221,8 @@ int Server::launchServer()
 
     
     while (true)
-    {
+    {   /*The all requset and response processes*/
         httpIO();
-        
     }
     return 0;
 }
@@ -247,7 +246,9 @@ int Server::getServersCountFromConf()
     return (int) unique_ports.size();
 }
 
-Directives* Server::getCorrespondingLoc(const RequestParser &request)
+int Server::getCorrespondingLoc(RequestParser &request)
 {
-    
+    std::cout << request.getRoute() <<  std::endl;
+
+    return (0);
 }
