@@ -9,6 +9,7 @@ public:
     ResponseParser(RequestParser);
     ResponseParser();
     int launchResponse();
+    int    setCorrespondingLocation();
 };
 
 #endif

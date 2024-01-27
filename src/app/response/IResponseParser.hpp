@@ -8,10 +8,10 @@ public:
     int             setFinish();
     
     /* Location which should be using for serveing data */
-    Directives*     corresponding_location;
-protected:
-    RequestParser   request;
     
+    Directives*     corresponding_location;
+    RequestParser   request;
+protected:
     std::string     buffer;
     std::string     content_type;
     std::string     server_name;

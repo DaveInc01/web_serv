@@ -40,3 +40,8 @@ int IRequestParser::getIsReqEnd()
 {
     return this->is_req_end;
 }
+
+std::string IRequestParser::getHost()
+{
+    return this->host;
+}

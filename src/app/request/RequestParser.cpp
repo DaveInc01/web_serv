@@ -21,6 +21,8 @@ int   RequestParser::setValue(std::string key, std::string &obj_property)
 
 int   RequestParser::setProperties(){
    parseRoute();
+   setValue("Host", this->host);
+
    if(this->method == "POST")
    {
       setValue("Content-Type", this->content_type);
