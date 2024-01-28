@@ -19,8 +19,9 @@ private:
 public:
     int         _port;
     std::string _host;
-    std::string _server_name;
-    int         sd;
+    std::string _listen;
+    std::vector<std::string> _server_name;
+    int sd;
     std::vector<std::pair<std::string, Directives> > _locations;
 
 public:

@@ -14,8 +14,6 @@ int main(){
     catch(...)
     {
         std::cout << "hhhhh" << std::endl;
-        // return (0);
-        // std::cerr << e.what() << std::endl;;
     }
     try{
         Server server1(configs._AllServs);

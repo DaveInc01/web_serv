@@ -23,8 +23,6 @@ public:
     void print_vect(std::vector<std::string> &v);
     void print_map(Vec);
 
-    
-
     //CHeck
 
     void    dir_is_valid(std::string dir, int from);

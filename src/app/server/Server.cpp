@@ -155,7 +155,7 @@ void Server::httpIO()
 
                     std::pair<int, ResponseParser> clients_resp_elem;
                     clients_resp_elem.first = sd;
-                    clients_resp_elem.second = ResponseParser(clientsReq.at(sd));
+                    clients_resp_elem.second = ResponseParser(clientsReq.at(sd), this->configs_map);
                     clientsResp.insert(clients_resp_elem);
                 }
                 FD_ZERO(&tmpReadfds);
@@ -230,10 +230,17 @@ int Server::launchServer()
 int Server::getServersCountFromConf()
 {   
     int p = 8000;
-    std::map<int, Config*>::iterator it;
+    std::vector<std::string> tmpListens = {"localhost:8001", "localhost:8001", "127.0.0.1:8001"};
+    std::vector<std::vector<std::string> > tmpServerNames = {{"localhost", "google"}, {"0.0.0.0"}, {"localhost", "youtube"}};
+
+    std::map<int, Config *>::iterator it;
+    int i = 0;
     for (it = configs_map.begin(); it != configs_map.end(); ++it)
     {
         it->second->_port = p++;
+        it->second->_listen = tmpListens.at(i);
+        it->second->_server_name = tmpServerNames.at(i);
+        i++;
     }
     for (it = configs_map.begin(); it != configs_map.end(); ++it)
     {

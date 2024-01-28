@@ -6,10 +6,10 @@
 class ResponseParser : public IResponseParser
 {
 public:
-    ResponseParser(RequestParser);
+    ResponseParser(RequestParser, std::map<int, Config *>);
     ResponseParser();
     int launchResponse();
-    int    setCorrespondingLocation();
+
 };
 
 #endif

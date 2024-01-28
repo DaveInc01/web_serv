@@ -6,10 +6,12 @@
 class IResponseParser{
 public:
     int             setFinish();
-    
+    int getCorresponding_server();
+    int setCorrespondingLocation();
+    Config *getMatchedServerName(std::vector<Config *>, std::string);
     /* Location which should be using for serveing data */
-    
-    Directives*     corresponding_location;
+    Directives *corresponding_location;
+    std::map<int, Config *> configs_map;
     RequestParser   request;
 protected:
     std::string     buffer;
