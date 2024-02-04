@@ -16,14 +16,15 @@ public:
    std::string getContentLength();
    std::string getPostReqBody();
    std::string getHttpReq();
-   int         getIsReqEnd();
    std::string getHost();
-
-protected:  
+   int         getIsReqEnd();
+   int         getPort();
+protected:
    std::string method;
    std::string route;
    std::string http_v;
    std::string url;
+   int         port;
    std::string host;
    std::string content_type;
    std::string content_length;

@@ -8,7 +8,6 @@ Server::Server( std::map<int, Config*> configs)
     max_sd = 0;
     /* find unique ports and init to servers_count */
     servers_count = getServersCountFromConf();
-
     server_sockets.resize(servers_count);
     client_sockets.resize(MAX_CLIENTS);
 }

@@ -45,3 +45,8 @@ std::string IRequestParser::getHost()
 {
     return this->host;
 }
+
+int     IRequestParser::getPort()
+{
+    return this->port;
+}

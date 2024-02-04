@@ -22,15 +22,21 @@ int   RequestParser::setValue(std::string key, std::string &obj_property)
 int   RequestParser::setProperties(){
    parseRoute();
    setValue("Host", this->host);
-
-   if(this->method == "POST")
+   if(this->host.length())
+   {
+      std::pair<std::string, std::string> p;
+      p = ft_split(this->host, ':');
+      // this->port = atoi(p.second.c_str());
+      // std::cout << "atoi ------" << this-getPort() << std::endl;     
+   }
+   if (this->method == "POST")
    {
       setValue("Content-Type", this->content_type);
       if(setValue("Content-Length", this->content_length) != -1)
       {
          this->content_length_int = atoi(content_length.c_str());
       }
-      setValue("Transfer-Encoding", this->transfer_encoding);
+         setValue("Transfer-Encoding", this->transfer_encoding);
    }
    return 0;
 }

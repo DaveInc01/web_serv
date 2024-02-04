@@ -8,7 +8,7 @@ public:
     int             setFinish();
     int getCorresponding_server();
     int setCorrespondingLocation();
-    Config *getMatchedServerName(std::vector<Config *>, std::string);
+    Config *getMatchedServerName(std::vector<Config *>, int);
     /* Location which should be using for serveing data */
     Directives *corresponding_location;
     std::map<int, Config *> configs_map;
