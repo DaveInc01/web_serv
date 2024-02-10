@@ -16,6 +16,7 @@ class Directives
 public:
     Vec directives;
 public:
+    
     Directives();
     Directives(Vec const &d_s);
     // Directives(Vec const &&d_s) {
@@ -25,7 +26,7 @@ public:
     
     void add_directives(std::pair<std::string,  std::vector<std::string> > &p);
     Vec const & get_directives() const;
-
+    std::string _root = "/www/hello"; // change
 };
 
 

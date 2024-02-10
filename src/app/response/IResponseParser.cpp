@@ -3,13 +3,9 @@
 int IResponseParser::setCorrespondingLocation()
 {
     Config* corresponding_server = this->getCorrespondingServer();
-    // for (std::vector<std::pair<std::string, Directives> >::iterator it = corresponding_server->_locations.begin(); it != corresponding_server->_locations.end(); ++it)
-    // {
-    //     std::cout << "Location - "<< it->first << std::endl;
-    // }
     // Directives* confDirective = corresponding_server;
     checkDefaultLocation(corresponding_server);
-    getCorrespondingLocation(corresponding_server);
+    this->corresponding_location = getCorrespondingLocation(corresponding_server);
     return 0;
 }
 
@@ -27,10 +23,39 @@ int  IResponseParser::checkDefaultLocation(Config* config){
     return (0);
 }
 
-Directives* IResponseParser::getCorrespondingLocation(Config* config){
+Directives &IResponseParser::getCorrespondingLocation(Config* config){
     std::string url_location = this->request.getRoute();
-    
-    return (NULL);
+    int index = -1;
+    size_t find_slash = 0;
+    while(url_location.find("/") != std::string::npos)
+    {
+        std::cout << "URL Location - " <<  url_location << std::endl;
+        index = findInVect(url_location, config);
+        if(index == -1)
+        {
+            if(url_location.length() > 1)
+            {
+                find_slash = url_location.rfind("/");
+                url_location = url_location.substr(0, find_slash);
+            }
+        }
+        else{
+            // setServeRoot();
+            std::cout << "Location has been found from configs\n\n";
+            return (config->_locations.at(index).second);
+        }
+    }
+    if(have_def_location)
+    {
+        /* set Location / as default */
+        std::cout << "Set Default Location from Conf '/' \n\n";
+        index = findInVect("/", config);
+        return (config->_locations.at(index).second);
+    }
+    /* set Config* as default */
+    // setServeRoot();
+    Directives& defaultDirective = *config;
+    return  defaultDirective;
 }
 
 Config *IResponseParser::getMatchedServerName(std::vector<Config *> same_ports, int req_port, std::string req_host_name)
@@ -87,5 +112,18 @@ Config* IResponseParser::getCorrespondingServer()
         return getMatchedServerName(same_ports, req_port, this->request.getHost());
 }
 
+int IResponseParser::findInVect(std::string url_location, Config * config)
+{
+    std::vector<std::pair<std::string, Directives> >::iterator it = config->_locations.begin();
+    for(; it != config->_locations.end(); ++it)
+    {
+        if(it->first == url_location)
+            return (it - config->_locations.begin());
+    }
+    return -1;
+}
 
-
+int IResponseParser::setServeRoot(){
+    /* set the location path which should serve the client */
+    return 0;
+}

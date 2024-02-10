@@ -8,15 +8,18 @@ public:
     int             setFinish();
     Config*         getCorrespondingServer();
     int             setCorrespondingLocation();
-    Directives*     getCorrespondingLocation(Config*);
+    Directives      &getCorrespondingLocation(Config*);
     Config          *getMatchedServerName(std::vector<Config *>, int, std::string);
     int             checkDefaultLocation(Config*);
+    int             findInVect(std::string, Config*);
+    int             setServeRoot();
 public:
     /* Location which should be using for serveing data */
-    Directives      *corresponding_location;
+    Directives      corresponding_location;
     RequestParser   request;
     std::map<int, Config *> configs_map;
 protected:
+    std::string     serve_root;
     std::string     buffer;
     std::string     content_type;
     std::string     server_name;
