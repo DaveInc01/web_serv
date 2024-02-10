@@ -6,13 +6,16 @@
 class IResponseParser{
 public:
     int             setFinish();
-    Config* getCorresponding_server();
-    int setCorrespondingLocation();
-    Config *getMatchedServerName(std::vector<Config *>, int, std::string);
+    Config*         getCorrespondingServer();
+    int             setCorrespondingLocation();
+    Directives*     getCorrespondingLocation(Config*);
+    Config          *getMatchedServerName(std::vector<Config *>, int, std::string);
+    int             checkDefaultLocation(Config*);
+public:
     /* Location which should be using for serveing data */
-    Directives *corresponding_location;
-    std::map<int, Config *> configs_map;
+    Directives      *corresponding_location;
     RequestParser   request;
+    std::map<int, Config *> configs_map;
 protected:
     std::string     buffer;
     std::string     content_type;
@@ -23,6 +26,7 @@ protected:
     int             is_finish;
     int             status_code;
     int             http_version;
+    int             have_def_location;
 };
 
 int findPosition(const std::vector<int>& vec);

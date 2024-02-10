@@ -10,7 +10,6 @@ int findPosition(const std::vector<int>& vec) {
             position = i;
         }
     }
-
     return position;
 }
 
@@ -37,7 +36,6 @@ int longestCommonPrefix(const std::string& str, const std::vector<std::string>& 
 int findIndexOfMax(const std::vector<int>& vec) {
     int maxElement = vec[0];  // Assume the first element is the maximum
     int maxIndex = 0;
-    std::cout << "vec.size - " << vec.size() << std::endl;
     for (int i = 1; i < vec.size(); ++i) {
         if (vec[i] > maxElement) {
             maxElement = vec[i];

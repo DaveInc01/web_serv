@@ -2,16 +2,36 @@
 
 int IResponseParser::setCorrespondingLocation()
 {
-    Config* corresponding_server = this->getCorresponding_server();
-    std::cout << "Queue - " << corresponding_server->queue << std::endl;
-    for (std::vector<std::pair<std::string, Directives> >::iterator it = corresponding_server->_locations.begin(); it != corresponding_server->_locations.end(); ++it)
-    {
-        std::cout << "Location - "<< it->first << std::endl;
-    }
-    Directives* confDirective = corresponding_server;
+    Config* corresponding_server = this->getCorrespondingServer();
+    // for (std::vector<std::pair<std::string, Directives> >::iterator it = corresponding_server->_locations.begin(); it != corresponding_server->_locations.end(); ++it)
+    // {
+    //     std::cout << "Location - "<< it->first << std::endl;
+    // }
+    // Directives* confDirective = corresponding_server;
+    checkDefaultLocation(corresponding_server);
+    getCorrespondingLocation(corresponding_server);
     return 0;
 }
 
+int  IResponseParser::checkDefaultLocation(Config* config){
+    std::vector<std::pair<std::string, Directives> >::iterator it = config->_locations.begin();
+    for (; it != config->_locations.end(); ++it)
+    {
+        if(it->first == "/")
+        {
+            this->have_def_location = 1;
+            return (1);
+        }
+    }
+    this->have_def_location = 0;
+    return (0);
+}
+
+Directives* IResponseParser::getCorrespondingLocation(Config* config){
+    std::string url_location = this->request.getRoute();
+    
+    return (NULL);
+}
 
 Config *IResponseParser::getMatchedServerName(std::vector<Config *> same_ports, int req_port, std::string req_host_name)
 {
@@ -48,7 +68,7 @@ Config *IResponseParser::getMatchedServerName(std::vector<Config *> same_ports, 
     // return same_ports.at(0);
 }
 
-Config* IResponseParser::getCorresponding_server()
+Config* IResponseParser::getCorrespondingServer()
 {
     int req_port = this->request.getPort();
     std::vector<Config *> same_ports;

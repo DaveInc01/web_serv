@@ -78,6 +78,12 @@
         "set": "cpp",
         "__verbose_abort": "cpp",
         "charconv": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "condition_variable": "cpp",
+        "queue": "cpp",
+        "thread": "cpp",
+        "ranges": "cpp",
+        "stop_token": "cpp",
+        "cinttypes": "cpp"
     }
 }
