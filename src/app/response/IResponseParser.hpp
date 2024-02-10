@@ -6,9 +6,9 @@
 class IResponseParser{
 public:
     int             setFinish();
-    int getCorresponding_server();
+    Config* getCorresponding_server();
     int setCorrespondingLocation();
-    Config *getMatchedServerName(std::vector<Config *>, int);
+    Config *getMatchedServerName(std::vector<Config *>, int, std::string);
     /* Location which should be using for serveing data */
     Directives *corresponding_location;
     std::map<int, Config *> configs_map;
@@ -24,5 +24,9 @@ protected:
     int             status_code;
     int             http_version;
 };
+
+int findPosition(const std::vector<int>& vec);
+int longestCommonPrefix(const std::string& str, const std::vector<std::string>& vec);
+int findIndexOfMax(const std::vector<int>& vec);
 
 #endif

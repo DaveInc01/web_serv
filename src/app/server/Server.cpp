@@ -230,15 +230,16 @@ int Server::getServersCountFromConf()
 {   
     int p = 8000;
     std::vector<std::string> tmpListens = {"localhost:8001", "localhost:8001", "127.0.0.1:8001"};
-    std::vector<std::vector<std::string> > tmpServerNames = {{"localhost", "google"}, {"0.0.0.0"}, {"localhost", "youtube"}};
+    std::vector<std::vector<std::string> > tmpServerNames = {{"localhost:800", "facobook"}, {"localhost:80"}, {"localhost", "youtube"}};
 
     std::map<int, Config *>::iterator it;
     int i = 0;
     for (it = configs_map.begin(); it != configs_map.end(); ++it)
     {
-        it->second->_port = p++;
+        it->second->_port = p;
         it->second->_listen = tmpListens.at(i);
-        it->second->_server_name = tmpServerNames.at(i);
+        it->second->_server_names = tmpServerNames.at(i);
+        it->second->queue = i;
         i++;
     }
     for (it = configs_map.begin(); it != configs_map.end(); ++it)

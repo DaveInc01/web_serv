@@ -20,7 +20,8 @@ public:
     int         _port;
     std::string _host;
     std::string _listen;
-    std::vector<std::string> _server_name;
+    std::vector<std::string> _server_names;
+    int queue;
     int sd;
     std::vector<std::pair<std::string, Directives> > _locations;
 

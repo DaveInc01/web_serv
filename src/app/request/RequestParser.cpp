@@ -26,8 +26,7 @@ int   RequestParser::setProperties(){
    {
       std::pair<std::string, std::string> p;
       p = ft_split(this->host, ':');
-      // this->port = atoi(p.second.c_str());
-      // std::cout << "atoi ------" << this-getPort() << std::endl;     
+      this->port = atoi(p.second.c_str());
    }
    if (this->method == "POST")
    {
