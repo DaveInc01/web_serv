@@ -33,11 +33,8 @@ Directives &IResponseParser::getCorrespondingLocation(Config* config){
         index = findInVect(url_location, config);
         if(index == -1)
         {
-            if(url_location.length() > 1)
-            {
-                find_slash = url_location.rfind("/");
-                url_location = url_location.substr(0, find_slash);
-            }
+            find_slash = url_location.rfind("/");
+            url_location = url_location.substr(0, find_slash);
         }
         else{
             // setServeRoot();
