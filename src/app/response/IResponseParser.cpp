@@ -6,6 +6,7 @@ int IResponseParser::setCorrespondingLocation()
     // Directives* confDirective = corresponding_server;
     checkDefaultLocation(corresponding_server);
     this->corresponding_location = getCorrespondingLocation(corresponding_server);
+    this->setServeRoot();
     return 0;
 }
 
@@ -33,12 +34,14 @@ Directives &IResponseParser::getCorrespondingLocation(Config* config){
         index = findInVect(url_location, config);
         if(index == -1)
         {
+
             find_slash = url_location.rfind("/");
             url_location = url_location.substr(0, find_slash);
         }
         else{
-            // setServeRoot();
-            std::cout << "Location has been found from configs\n\n";
+            /* The location block was found from configs */
+            std::cout << "Location has been found from configs - " << config->_locations.at(index).first << std::endl;
+            this->location_class_path = config->_locations.at(index).first;
             return (config->_locations.at(index).second);
         }
     }
@@ -47,11 +50,12 @@ Directives &IResponseParser::getCorrespondingLocation(Config* config){
         /* set Location / as default */
         std::cout << "Set Default Location from Conf '/' \n\n";
         index = findInVect("/", config);
+        this->location_class_path = "/";
         return (config->_locations.at(index).second);
     }
     /* set Config* as default */
-    // setServeRoot();
     Directives& defaultDirective = *config;
+    this->location_class_path = "/";
     return  defaultDirective;
 }
 
@@ -120,7 +124,24 @@ int IResponseParser::findInVect(std::string url_location, Config * config)
     return -1;
 }
 
+/* set the location path which should serve the client */
 int IResponseParser::setServeRoot(){
-    /* set the location path which should serve the client */
+    std::string url_location = this->request.getRoute();
+    size_t cut_from = url_location.find(this->location_class_path);
+    if(cut_from != std::string::npos)
+    {   
+       std::cout << "url location - " << url_location << std::endl << "location class path - " << location_class_path << std::endl;  
+       std::cout << "Found cut index is " << cut_from << std::endl;
+       try{
+            this->serve_root = url_location.substr(location_class_path.length(), url_location.length());
+            this->serve_root = this->corresponding_location._root + this->serve_root;
+       }
+       catch(std::exception &e)
+       {
+           std::cout << e.what() << std::endl;
+       }
+       std::cout << "The last part of final serve path is - " << this->serve_root << std::endl;
+    }
+    // this->location_class_path =  
     return 0;
 }

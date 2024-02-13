@@ -19,6 +19,7 @@ public:
     RequestParser   request;
     std::map<int, Config *> configs_map;
 protected:
+    std::string     location_class_path;
     std::string     serve_root;
     std::string     buffer;
     std::string     content_type;
