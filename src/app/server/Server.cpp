@@ -169,8 +169,24 @@ void Server::httpIO()
         {
             // if(clientsResp.at(sd).is_finsh)
             char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
-            int send_res = send(sd,arr,sizeof(arr),0);
+            std::string my_response = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: ";
+            struct stat filestatus;
+	        stat("src/www/index.html", &filestatus );
+
             std::cout << clientsReq.at(sd).getHttpReq();
+
+            my_response += std::to_string(filestatus.st_size) + "\n\n";
+            // int status = system("open src/www/index.html");
+            std::ifstream ifs("src/www/index.html");
+            std::string content( (std::istreambuf_iterator<char>(ifs) ),
+                       (std::istreambuf_iterator<char>()    ) );
+            
+            // std::cout << "Content of file - " << content << std::endl;
+            // std::ifstream MyFile("src/www/index.html");
+            my_response+= content;
+	        std::cout << "The Response is  " << my_response << "\n";
+
+            int send_res = send(sd, my_response.c_str(), my_response.length(),0);
             getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
             std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
             
@@ -228,7 +244,7 @@ int Server::launchServer()
 
 int Server::getServersCountFromConf()
 {   
-    int p = 8000;
+    int p = 8003;
     std::vector<std::string> tmpListens = {"localhost:8001", "localhost:8001", "127.0.0.1:8001"};
     std::vector<std::vector<std::string> > tmpServerNames = {{"localhost:800", "facobook"}, {"localhost:80"}, {"localhost", "youtube"}};
 

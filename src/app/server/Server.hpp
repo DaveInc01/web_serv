@@ -19,6 +19,8 @@
 #include "request/RequestParser.hpp"
 #include "response/ResponseParser.hpp"
 #include "config/AllConfigs.hpp"
+#include <sys/stat.h>
+#include <sys/types.h>
 
 class Config;
 class AllConfigs;
