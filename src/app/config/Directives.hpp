@@ -26,13 +26,8 @@ public:
     
     void add_directives(std::pair<std::string,  std::vector<std::string> > &p);
     Vec const & get_directives() const;
-    std::string _root = "/www/hello"; // change
+    std::string _root = "/www/hello/"; // change
 };
-
-
-
-
-
 
 
 #endif

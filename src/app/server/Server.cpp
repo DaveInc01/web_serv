@@ -184,7 +184,7 @@ void Server::httpIO()
             // std::cout << "Content of file - " << content << std::endl;
             // std::ifstream MyFile("src/www/index.html");
             my_response+= content;
-	        std::cout << "The Response is  " << my_response << "\n";
+	        // std::cout << "The Response is  " << my_response << "\n";
 
             int send_res = send(sd, my_response.c_str(), my_response.length(),0);
             getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);

@@ -4,6 +4,7 @@ int main(){
     AllConfigs configs;
     try{
         configs.readConff();
+        
     }
     catch(const std::exception& e)
     {
