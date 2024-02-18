@@ -10,27 +10,34 @@
 #include <algorithm> 
 #include "Directives.hpp"
 
-// typedef std::vector<std::pair<std::string,  std::vector<std::string>>> Vec;
-
 class Config : public Directives
 {
-private:
-    //Vec directives;
 public:
     int         _port;
     std::string _host;
+    std::vector<std::string> _server_name;
     std::string _listen;
-    std::vector<std::string> _server_names;
-    int queue;
-    int sd;
-    std::vector<std::pair<std::string, Directives> > _locations;
+    std::vector<std::pair<std::string, Directives *> > _locations;
+    void sum_func();
 
 public:
     Config();
     ~Config();
 
-    void add_locations(std::pair<std::string, Directives> &p);
-    std::vector<std::pair<std::string, Directives> > const & get_locations() const;
+    void fillLocations();
+    void add_locations(std::pair<std::string, Directives *> p);
+
+    std::vector<std::pair<std::string, Directives *> >  const & get_locations() const;
+    std::string  const& getListen() const;
+    std::vector<std::string> const&  getServerName() const;
+
+    void add_listen(std::pair<std::string, std::vector<std::string> > &p);
+    void add_servername(std::pair<std::string,  std::vector<std::string> > &p);
+    void printConfig() const;
+
+
+   
+   
 };
 
 

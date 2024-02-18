@@ -12,7 +12,7 @@ int IResponseParser::setCorrespondingLocation()
 }
 
 int  IResponseParser::checkDefaultLocation(Config* config){
-    std::vector<std::pair<std::string, Directives> >::iterator it = config->_locations.begin();
+    std::vector<std::pair<std::string, Directives*> >::iterator it = config->_locations.begin();
     for (; it != config->_locations.end(); ++it)
     {
         if(it->first == "/")
@@ -25,7 +25,7 @@ int  IResponseParser::checkDefaultLocation(Config* config){
     return (0);
 }
 
-Directives &IResponseParser::getCorrespondingLocation(Config* config){
+Directives *IResponseParser::getCorrespondingLocation(Config* config){
     std::string url_location = this->request.getRoute();
     int index = -1;
     size_t find_slash = 0;
@@ -55,7 +55,7 @@ Directives &IResponseParser::getCorrespondingLocation(Config* config){
     }
     /* set Config* as default */
     std::cout << "Set Default Location Main Server / \n\n";
-    Directives& defaultDirective = *config;
+    Directives* defaultDirective = config;
     return  defaultDirective;
 }
 
@@ -66,9 +66,9 @@ Config *IResponseParser::getMatchedServerName(std::vector<Config *> same_ports, 
     /* comparing the req_host_name with the server_names of Configs */
     for (std::vector<Config *>::iterator confIt = same_ports.begin(); confIt != same_ports.end(); ++confIt)
     {
-        servNameIt = std::find((*confIt)->_server_names.begin(), (*confIt)->_server_names.end(), req_host_name);
-        if (servNameIt != (*confIt)->_server_names.end())
-            name_positions.push_back(servNameIt - (*confIt)->_server_names.begin());
+        servNameIt = std::find((*confIt)->_server_name.begin(), (*confIt)->_server_name.end(), req_host_name);
+        if (servNameIt != (*confIt)->_server_name.end())
+            name_positions.push_back(servNameIt - (*confIt)->_server_name.begin());
         else
             name_positions.push_back(-1);
     }
@@ -83,7 +83,7 @@ Config *IResponseParser::getMatchedServerName(std::vector<Config *> same_ports, 
         int matched_chars = 0;
         for (std::vector<Config *>::iterator confIt = same_ports.begin(); confIt != same_ports.end(); ++confIt)
         {
-            matched_chars = longestCommonPrefix(req_host_name, (*confIt)->_server_names);
+            matched_chars = longestCommonPrefix(req_host_name, (*confIt)->_server_name);
             // std::cout << "matched chars - " << matched_chars << std::endl;
             name_positions.push_back(matched_chars);
         }
@@ -115,7 +115,7 @@ Config* IResponseParser::getCorrespondingServer()
 
 int IResponseParser::findInVect(std::string url_location, Config * config)
 {
-    std::vector<std::pair<std::string, Directives> >::iterator it = config->_locations.begin();
+    std::vector<std::pair<std::string, Directives*> >::iterator it = config->_locations.begin();
     for(; it != config->_locations.end(); ++it)
     {
         if(it->first == url_location)
@@ -137,9 +137,9 @@ int IResponseParser::setServeRoot(){
             if(this->serve_root[0] != '/')
                 this->serve_root.insert(0, 1, '/');
             /* if root is ending with '/' remove it (www/tmp/<-) */
-            if(this->corresponding_location._root[this->corresponding_location._root.length() - 1] == '/')
-                this->corresponding_location._root[this->corresponding_location._root.length() - 1] = '\0';
-            this->serve_root = this->corresponding_location._root + this->serve_root;
+            if(this->corresponding_location->_root[this->corresponding_location->_root.length() - 1] == '/')
+                this->corresponding_location->_root[this->corresponding_location->_root.length() - 1] = '\0';
+            this->serve_root = this->corresponding_location->_root + this->serve_root;
         }
        catch(std::exception &e)
         {

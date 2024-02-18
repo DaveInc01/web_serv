@@ -17,18 +17,19 @@ public:
     void readConff();
     size_t find_server_end(std::string str);
     void make_location(std::string &s, Config &S);
-    Config *makeServer(std::string &s);
-    void print_AllServs();
-    void print_serv(int n);
-    void print_vect(std::vector<std::string> &v);
-    void print_map(Vec);
+    Config *makeServer(const std::string &file);
+
+    Config const&  get_Server(int n) const;
+    Directives const* get_location(int n, std::string str) const;
+    void chech_directive();
 
     //CHeck
 
     void    dir_is_valid(std::string dir, int from);
     void    check_validity(std::string const &full) const;
     void    check_parentheses(std::string const &full) const;
-
+    void    cut_location(std::string &s, Config *S);
+    
 };
 
 

@@ -13,21 +13,44 @@ typedef std::vector<std::pair<std::string,  std::vector<std::string> > > Vec;
 
 class Directives 
 {
+
 public:
-    Vec directives;
-public:
-    
     Directives();
-    Directives(Vec const &d_s);
-    // Directives(Vec const &&d_s) {
-    //     std::cout << "\n\n\n\n\nDirectives(Vec const &&d_s)\n\n\n\n\n\n";
-    // };
     ~Directives();
     
     void add_directives(std::pair<std::string,  std::vector<std::string> > &p);
-    Vec const & get_directives() const;
-    std::string _root = "/www/hello/"; // change
+
+
+   /* Getter functions */
+public:
+    std::string _autoindex;
+    std::vector<std::string> _index;
+    std::string _root;
+    std::string _upload_path;
+    std::string _client_max_body_size;
+    std::vector<std::pair<std::string, std::string> > _error_page;
+    std::vector<std::string> _methods;
+    std::string _cgi;
+    std::string _return;
+
+    std::string const & getAutoindex() const;
+    std::vector<std::string> const &  getIndex() const;
+    std::string const &  getRoot() const;
+    std::string const &  getUpload_path() const;
+    std::string const &  getClient_max_body_size() const;
+    std::vector<std::pair<std::string, std::string> > const &  getError_page() const;
+    std::vector<std::string> const &  getMethods() const;
+    std::string const &  getCgi() const;
+    std::string const &  getReturn() const;
+    
+    void printDirective() const;
+
 };
+
+
+
+
+
 
 
 #endif

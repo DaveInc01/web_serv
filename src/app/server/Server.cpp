@@ -186,7 +186,13 @@ void Server::httpIO()
             my_response+= content;
 	        // std::cout << "The Response is  " << my_response << "\n";
 
-            int send_res = send(sd, my_response.c_str(), my_response.length(),0);
+             std::stringstream response;
+            response << "HTTP/1.1 302 Found\r\n";
+            response << "Location: http://www.example.com/new-page\r\n";
+            response << "Connection: close\r\n";
+            response << "\r\n";
+            const std::string tmp = response.str();
+            int send_res = send(sd, tmp.c_str(), tmp.length(),0);
             getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
             std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
             
@@ -250,14 +256,6 @@ int Server::getServersCountFromConf()
 
     std::map<int, Config *>::iterator it;
     int i = 0;
-    for (it = configs_map.begin(); it != configs_map.end(); ++it)
-    {
-        it->second->_port = p;
-        it->second->_listen = tmpListens.at(i);
-        it->second->_server_names = tmpServerNames.at(i);
-        it->second->queue = i;
-        i++;
-    }
     for (it = configs_map.begin(); it != configs_map.end(); ++it)
     {
         /* Check unique ports and add to vector from Server class */
