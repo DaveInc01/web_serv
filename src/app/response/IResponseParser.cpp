@@ -6,8 +6,8 @@ int IResponseParser::setCorrespondingLocation()
     // Directives* confDirective = corresponding_server;
     checkDefaultLocation(corresponding_server);
     this->corresponding_location = getCorrespondingLocation(corresponding_server);
-
     this->setServeRoot();
+	std::cout << "SERVE_ROOT << " << this->serve_root << std::endl;
     return 0;
 }
 
@@ -34,13 +34,11 @@ Directives *IResponseParser::getCorrespondingLocation(Config* config){
         index = findInVect(url_location, config);
         if(index == -1)
         {
-            std::cout << "url_location - " << url_location << std::endl;
             find_slash = url_location.rfind("/");
             url_location = url_location.substr(0, find_slash);
         }
         else{
             /* The location block was found from configs */
-            std::cout << "The right one - " << config->_locations.at(index).first << std::endl;
             this->location_class_path = config->_locations.at(index).first;
             return (config->_locations.at(index).second);
         }
@@ -64,6 +62,13 @@ Config *IResponseParser::getMatchedServerName(std::vector<Config *> same_ports, 
     std::vector<int> name_positions;
     std::vector<std::string>::iterator servNameIt;
     /* comparing the req_host_name with the server_names of Configs */
+	for (std::vector<Config *>::iterator confIt = same_ports.begin(); confIt != same_ports.end(); ++confIt)
+    {
+		if((*confIt)->_listen == req_host_name)
+		{
+			return (same_ports.at((confIt) - same_ports.begin()));
+		}
+	}
     for (std::vector<Config *>::iterator confIt = same_ports.begin(); confIt != same_ports.end(); ++confIt)
     {
         servNameIt = std::find((*confIt)->_server_name.begin(), (*confIt)->_server_name.end(), req_host_name);
@@ -130,7 +135,7 @@ int IResponseParser::setServeRoot(){
     size_t cut_from = url_location.find(this->location_class_path);
     if(cut_from != std::string::npos)
     {   
-       std::cout << "url location - " << url_location << std::endl << "location class path - " << location_class_path << std::endl;  
+       std::cout << "url location - " << url_location << std::endl;  
        try{
             this->serve_root = url_location.substr(location_class_path.length(), url_location.length());
             /* add url location / at first (/ + favicon.ico) */
@@ -145,8 +150,6 @@ int IResponseParser::setServeRoot(){
         {
            std::cout << e.what() << std::endl;
         }
-       std::cout << "The last part of final serve path is - " << this->serve_root << std::endl;
     }
-    // this->location_class_path =  
     return 0;
 }

@@ -192,7 +192,9 @@ void Server::httpIO()
             response << "Connection: close\r\n";
             response << "\r\n";
             const std::string tmp = response.str();
-            int send_res = send(sd, tmp.c_str(), tmp.length(),0);
+
+            int send_res = send(sd, my_response.c_str(), my_response.length(),0);
+
             getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
             std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
             
