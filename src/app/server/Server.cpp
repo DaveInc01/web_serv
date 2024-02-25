@@ -1,5 +1,7 @@
 #include "Server.hpp"
 
+#define SEND_SIZE 20
+
 Server::Server( std::map<int, Config*> configs)
 {
     this->configs_map = configs;
@@ -82,7 +84,6 @@ void Server::httpIO()
     do {
         activity = select(max_sd + 1, &tmpReadfds, &tmpWritefds, NULL, NULL);
     } while (activity == -1);
-
     if((activity < 0) && (errno != EINTR))
     {
         std::cout << "activity - " << activity << std::endl;
@@ -158,7 +159,7 @@ void Server::httpIO()
                     clientsResp.insert(clients_resp_elem);
                 }
                 FD_ZERO(&tmpReadfds);
-                FD_ZERO(&tmpWritefds);
+                // FD_ZERO(&tmpWritefds);
                 continue;
             }
             else if(valread == 0){
@@ -167,48 +168,28 @@ void Server::httpIO()
         }
         else if(FD_ISSET(sd, &tmpWritefds))
         {
-            // if(clientsResp.at(sd).is_finsh)
-            char arr[200]="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
-            std::string my_response = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: ";
-            struct stat filestatus;
-	        stat("src/www/index.html", &filestatus );
+			if(clientsResp.at(sd)._response.length() > SEND_SIZE)
+			{
+				/* Response is bigger than SEND_SIZE */
+            	int send_res = send(sd, clientsResp.at(sd)._response.c_str(), SEND_SIZE,0);
+				clientsResp.at(sd)._response = clientsResp.at(sd)._response.substr(SEND_SIZE, (clientsResp.at(sd)._response.length() - SEND_SIZE));
+				// FD_ZERO(&tmpWritefds);
+				break ;
+			}
+			else{
+            	int send_res = send(sd, clientsResp.at(sd)._response.c_str(), clientsResp.at(sd)._response.size(), 0);
+				getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
+				std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
+				
+				clientsReq.erase(sd); 
+				clientsResp.erase(sd);
+				close(sd);
 
-            std::cout << clientsReq.at(sd).getHttpReq();
-
-            my_response += std::to_string(filestatus.st_size) + "\n\n";
-            // int status = system("open src/www/index.html");
-            std::ifstream ifs("src/www/index.html");
-            std::string content( (std::istreambuf_iterator<char>(ifs) ),
-                       (std::istreambuf_iterator<char>()    ) );
-            
-            // std::cout << "Content of file - " << content << std::endl;
-            // std::ifstream MyFile("src/www/index.html");
-            my_response+= content;
-	        // std::cout << "The Response is  " << my_response << "\n";
-
-             std::stringstream response;
-            response << "HTTP/1.1 302 Found\r\n";
-            response << "Location: http://www.example.com/new-page\r\n";
-            response << "Connection: close\r\n";
-            response << "\r\n";
-            const std::string tmp = response.str();
-
-            int send_res = send(sd, my_response.c_str(), my_response.length(),0);
-
-            getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
-            std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
-            
-            clientsReq.erase(sd); 
-            close(sd);
-
-            FD_CLR(sd, &writefds);
-            FD_CLR(sd, &tmpWritefds);
-            FD_ZERO(&tmpWritefds);
-            FD_ZERO(&tmpReadfds);
-            FD_CLR(sd, &readfds);
-            FD_CLR(sd, &tmpReadfds);
-            // max_sd-=1;
-            client_sockets.at(i) = 0;
+				FD_CLR(sd, &writefds);
+				FD_CLR(sd, &tmpWritefds);
+				FD_ZERO(&tmpWritefds);
+				client_sockets.at(i) = 0;
+			}
         }  
     }
 }

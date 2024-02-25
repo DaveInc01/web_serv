@@ -131,6 +131,15 @@ int IResponseParser::findInVect(std::string url_location, Config * config)
 
 /* set the location PATH(serve_root) which should serve the client */
 int IResponseParser::setServeRoot(){
+
+/* redirect respone example */
+            // std::stringstream redirect_response;
+            // redirect_response << "HTTP/1.1 302 Found\r\n";
+            // redirect_response << "Location: http://www.example.com/new-page\r\n";
+            // redirect_response << "Connection: close\r\n";
+            // redirect_response << "\r\n";
+            // const std::string tmp = redirect_response.str();	
+
     std::string url_location = this->request.getRoute();
     size_t cut_from = url_location.find(this->location_class_path);
     if(cut_from != std::string::npos)
@@ -153,3 +162,9 @@ int IResponseParser::setServeRoot(){
     }
     return 0;
 }
+
+// int IResponseParser::cutResponse(int from)
+// {
+// 	this->_response = this->_response.substr(from, (this->_response.length() - from));
+// 	return 0;
+// }

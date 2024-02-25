@@ -5,6 +5,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "config/AllConfigs.hpp"
 
 class IRequestParser {

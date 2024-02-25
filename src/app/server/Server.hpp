@@ -16,11 +16,11 @@
 #include <string>
 #include <vector>
 #include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "request/RequestParser.hpp"
 #include "response/ResponseParser.hpp"
 #include "config/AllConfigs.hpp"
-#include <sys/stat.h>
-#include <sys/types.h>
 
 class Config;
 class AllConfigs;

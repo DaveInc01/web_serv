@@ -13,6 +13,7 @@ public:
     int             checkDefaultLocation(Config*);
     int             findInVect(std::string, Config*);
     int             setServeRoot();
+	int				cutResponse(int);
 public:
     /* Location which should be using for serveing data */
     Directives      *corresponding_location;
@@ -31,6 +32,7 @@ protected:
     int             status_code;
     int             http_version;
     int             have_def_location;
+	
 };
 
 int findPosition(const std::vector<int>& vec);
