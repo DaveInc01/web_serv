@@ -1,12 +1,12 @@
 #include "Server.hpp"
 
-#define SEND_SIZE 20
+#define SEND_SIZE 100000
 
 Server::Server( std::map<int, Config*> configs)
 {
     this->configs_map = configs;
     this->MAX_CLIENTS = 5;
-    buff_size = 200;
+    buff_size = 100000;
     max_sd = 0;
     /* find unique ports and init to servers_count */
     servers_count = getServersCountFromConf();
@@ -136,10 +136,11 @@ void Server::httpIO()
         {
             valread = recv(sd, buff, sizeof(buff) - 1, 0);
             buff[valread] = '\0';
+            // std::cout << "Buff length - " << sizeof() << std::endl;
 
             if (valread > 0)
             {
-                std::string strBuff(buff);
+                std::string strBuff(buff, valread);
                 try{
                     clientsReq.at(sd).launchParse(strBuff, strBuff.size());
                 }
@@ -152,7 +153,6 @@ void Server::httpIO()
                     FD_SET(sd, &writefds);
                     FD_CLR(sd, &readfds);
                     FD_CLR(sd, &tmpReadfds);
-
                     std::pair<int, ResponseParser> clients_resp_elem;
                     clients_resp_elem.first = sd;
                     clients_resp_elem.second = ResponseParser(clientsReq.at(sd), this->configs_map);

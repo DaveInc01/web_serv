@@ -146,7 +146,6 @@ int   RequestParser::launchParse( std::string buff, int len )
       }
    }
    findReqEnd();
-
    return 0;
 }
 
@@ -212,6 +211,7 @@ int   RequestParser::findReqEnd()
          }
          else if(this->transfer_encoding == "chunked"){
             /* for chunked request */
+
             if(this->http_req.find("0\r\n\r\n", http_req.size() - 5) != std::string::npos)
             {
                this->is_req_end = 1;
