@@ -124,7 +124,7 @@ int   RequestParser::launchParse( std::string buff, int len )
             if(this->method.empty())
             {
                if(parseMethod(line) == -1)
-                  throw("Unknown request method");
+                  throw(403);
                // std::cout << "start - " << line;
             }
             /* End of request header */

@@ -21,6 +21,7 @@
 #include "request/RequestParser.hpp"
 #include "response/ResponseParser.hpp"
 #include "config/AllConfigs.hpp"
+#include "server/Errors.hpp"
 
 class Config;
 class AllConfigs;

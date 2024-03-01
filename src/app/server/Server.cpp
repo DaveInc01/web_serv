@@ -144,8 +144,13 @@ void Server::httpIO()
                 try{
                     clientsReq.at(sd).launchParse(strBuff, strBuff.size());
                 }
-                catch(const char* error){
-                    std::cout << error << std::endl;
+                catch(int errorStatus){
+                    std::cout << errorStatus << std::endl;
+                    Errors *e = new Errors(400);
+                    int send_res = send(sd, e->getErrorResponse().c_str(), e->getErrorResponse().length(), 0);
+                    delete e;
+                    FD_CLR(sd, &readfds);
+                    FD_CLR(sd, &tmpReadfds);
                     break ;
                 }
                 if(clientsReq.at(sd).getIsReqEnd())
@@ -163,6 +168,12 @@ void Server::httpIO()
                 continue;
             }
             else if(valread == 0){
+                Errors *e = new Errors(400);
+                int send_res = send(sd, e->getErrorResponse().c_str(), e->getErrorResponse().length(), 0);
+                delete e;
+                FD_CLR(sd, &readfds);
+                FD_CLR(sd, &tmpReadfds);
+                break ;
                 /* 400 code */
             }
         }
@@ -199,7 +210,6 @@ int Server::launchServer()
     for (int i = 0; i < servers_count; i++)
     {
         server_sockets[i] = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
         if (server_sockets.at(i) < 0)
         {
             throw ("The socket not oppened");
@@ -219,7 +229,6 @@ int Server::launchServer()
     FD_ZERO(&writefds);
     FD_ZERO(&tmpReadfds);
     FD_ZERO(&tmpWritefds);
-
     /* Set server Sockets to &readfds */
     setServSockets();
 
