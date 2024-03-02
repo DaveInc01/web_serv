@@ -31,7 +31,7 @@ int Errors::setDefaultErrorResponse(int status)
     return 0;
 }
 
-Errors::Errors(int status)
+Errors::Errors(int status, std::vector<std::pair<std::string, std::string> > conf_error)
 {
     setErrorMap();
     this->setDefaultErrorResponse(status);

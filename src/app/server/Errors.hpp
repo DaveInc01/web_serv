@@ -6,12 +6,12 @@ class Errors
 {
 private:
     std::map<int, std::string>	_errors;
+    std::string _def_error_response;
 public:
-    Errors(int);
+    Errors(int status, std::vector<std::pair<std::string, std::string> > conf_error);
     ~Errors();
     int setErrorMap();
     int setDefaultErrorResponse(int);
-    std::string _def_error_response;
     std::string getErrorResponse();
 };
 

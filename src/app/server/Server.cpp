@@ -141,18 +141,8 @@ void Server::httpIO()
             if (valread > 0)
             {
                 std::string strBuff(buff, valread);
-                try{
-                    clientsReq.at(sd).launchParse(strBuff, strBuff.size());
-                }
-                catch(int errorStatus){
-                    std::cout << errorStatus << std::endl;
-                    Errors *e = new Errors(400);
-                    int send_res = send(sd, e->getErrorResponse().c_str(), e->getErrorResponse().length(), 0);
-                    delete e;
-                    FD_CLR(sd, &readfds);
-                    FD_CLR(sd, &tmpReadfds);
-                    break ;
-                }
+                clientsReq.at(sd).launchParse(strBuff, strBuff.size());
+
                 if(clientsReq.at(sd).getIsReqEnd())
                 {
                     FD_SET(sd, &writefds);
@@ -168,12 +158,12 @@ void Server::httpIO()
                 continue;
             }
             else if(valread == 0){
-                Errors *e = new Errors(400);
-                int send_res = send(sd, e->getErrorResponse().c_str(), e->getErrorResponse().length(), 0);
-                delete e;
-                FD_CLR(sd, &readfds);
-                FD_CLR(sd, &tmpReadfds);
-                break ;
+                // Errors *e = new Errors(400);
+                // int send_res = send(sd, e->getErrorResponse().c_str(), e->getErrorResponse().length(), 0);
+                // delete e;
+                // FD_CLR(sd, &readfds);
+                // FD_CLR(sd, &tmpReadfds);
+                // break ;
                 /* 400 code */
             }
         }

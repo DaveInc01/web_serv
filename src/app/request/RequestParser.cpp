@@ -47,21 +47,10 @@ int   RequestParser::parseUrl()
 
 int RequestParser::parseMethod(std::string line)
 {
-   std::string reqMethods[3] = {"GET", "POST", "DELETE"};
-   int i = 0;
-   int found;
-   while(i < 3)
-   {
-      if(line.find(reqMethods[i]) == 0)
-      {
-         this->method = reqMethods[i];
-         this->request.insert(std::make_pair("start", line));
-         return 0;
-      }
-      else
-         i++;
-   }
-   return -1;
+   // std::string reqMethods[3] = {"GET", "POST", "DELETE"};
+   this->method = line.substr(0, line.find(" "));
+   this->request.insert(std::make_pair("start", line));
+   return 0;
 }
 
 int   RequestParser::parseRoute()
@@ -122,11 +111,7 @@ int   RequestParser::launchParse( std::string buff, int len )
          {
             /* Start line is empty */
             if(this->method.empty())
-            {
-               if(parseMethod(line) == -1)
-                  throw(403);
-               // std::cout << "start - " << line;
-            }
+               parseMethod(line);
             /* End of request header */
             else if(line == "\r\n"){
                header_finish = 1;
