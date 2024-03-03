@@ -1,5 +1,18 @@
 #include "IRequestParser.hpp"
 
+std::string concatStrings(std::string str1, std::string str2){
+    if(str1.size())
+        if(str1[str1.length()] != '/')
+            str1.push_back('/');
+    if(str2.size())
+    {
+        if(str2[0] == '/')
+            str2.erase(0, 1);
+    }
+    str1 += str2;
+    return str1;
+}
+
 std::string& rtrim(std::string& s)
 {
 	const char* ws = " \t\n\r\f\v";

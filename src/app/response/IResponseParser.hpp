@@ -20,6 +20,7 @@ public:
     Directives      *corresponding_location;
     RequestParser   request;
     std::map<int, Config *> configs_map;
+    std::string getServerRoot();
 protected:
     std::string     location_class_path;
     std::string     serve_root;

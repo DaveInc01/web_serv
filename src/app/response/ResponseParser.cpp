@@ -14,8 +14,6 @@ void ResponseParser::setResponse(std::string r){
 	this->_response = r;
 }
 
-
-
 std::string ResponseParser::checkErrorFromConf(int status)
 {
 	std::vector<std::pair<std::string, std::string> > error_from_conf = this->corresponding_location->getError_page();
@@ -100,6 +98,7 @@ int ResponseParser::launchResponse()
 	
 	my_response	+= content;
 	this->_response = my_response;
+	std::cout << "Serve rooooot" << this->serve_root << std::endl;
     return 0;
 };
 

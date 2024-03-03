@@ -163,6 +163,11 @@ int IResponseParser::setServeRoot(){
     return 0;
 }
 
+std::string IResponseParser::getServerRoot()
+{
+    return this->serve_root;
+}
+
 // int IResponseParser::cutResponse(int from)
 // {
 // 	this->_response = this->_response.substr(from, (this->_response.length() - from));

@@ -5,16 +5,21 @@
 class Errors
 {
 private:
-    std::map<int, std::string>	_errors;
-    std::string _def_error_response;
+    std::map<int, std::string>	_status_codes;
+    std::string error_response;
+    std::string error_file_path;
 public:
-    Errors(int status, std::vector<std::pair<std::string, std::string> > conf_error);
+    Errors();
+    Errors(int status, ResponseParser&);
     ~Errors();
     int setErrorMap();
     int setDefaultErrorResponse(int);
+    std::string getPathFromConf(int status, ResponseParser&);
     std::string getErrorResponse();
+    std::string getStatusText(int status_code);
+    std::string getStatusLine(int status_code);
 };
 
-
+std::string concatStrings(std::string str1, std::string str2);
 
 #endif
