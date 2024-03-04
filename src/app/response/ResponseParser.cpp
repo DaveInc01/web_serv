@@ -1,4 +1,5 @@
 #include "ResponseParser.hpp"
+#include "server/Errors.hpp"
 
 ResponseParser::ResponseParser(RequestParser req, std::map<int, Config *> configs_map)
 {
@@ -41,8 +42,12 @@ int ResponseParser::checkIsAloowedMethod(){
 	std::vector<std::string>::iterator found = std::find(http_methods.begin(), http_methods.end(), req_method);
 	if(found == http_methods.end())
 		throw(405);
+	std::vector<std::string> allowed_methods = this->corresponding_location->getMethods();
+	found = std::find(allowed_methods.begin(), allowed_methods.end(), req_method);
+	if(found == allowed_methods.end())
+		throw(405);
 	return 0;
-}
+}	
 
 int ResponseParser::generateGetResponse()
 {
@@ -51,6 +56,10 @@ int ResponseParser::generateGetResponse()
 
 int ResponseParser::generatePostResponse()
 {
+	std::cout << this->request.getContentType() << std::endl;
+    std::ofstream out("output.jpg");
+	out << this->request.getPostReqBody();
+	out.close();
     return 0;
 }
 
@@ -81,9 +90,12 @@ int ResponseParser::launchResponse()
 	catch(int status)
 	{
 		
-		// Errors *e = new Errors(400, this->corresponding_location->getError_page());
+		Errors *e = new Errors(status, *this);
+		this->_response = e->getErrorResponse();
+		delete e;
+		return 0;
 		
-		std::cout << "The response is returned staus code ---- " << status << std::endl;
+		// std::cout << "The response is returned staus code ---- " << status << std::endl;
 	}
 	std::string arr="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
 	std::string my_response = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: ";
@@ -91,13 +103,13 @@ int ResponseParser::launchResponse()
 	stat("src/www/index.html", &filestatus );
 	std::cout << this->request.getHttpReq();
 	my_response += std::to_string(filestatus.st_size) + "\n\n";
-	// int status = system("open src/www/index.html");
 	std::ifstream ifs("src/www/index.html");
 	std::string content( (std::istreambuf_iterator<char>(ifs) ),
 				(std::istreambuf_iterator<char>()    ) );
 	
 	my_response	+= content;
 	this->_response = my_response;
+	ifs.close();
 	std::cout << "Serve rooooot" << this->serve_root << std::endl;
     return 0;
 };

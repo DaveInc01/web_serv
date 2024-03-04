@@ -41,6 +41,8 @@ protected:
    int         header_finish;
    int         header_line_finish;
    int         is_req_end;
+   std::string boundary;
+   
    std::map<std::string, std::string>  request;
 };
 

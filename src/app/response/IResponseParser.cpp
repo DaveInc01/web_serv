@@ -52,7 +52,6 @@ Directives *IResponseParser::getCorrespondingLocation(Config* config){
         return (config->_locations.at(index).second);
     }
     /* set Config* as default */
-    std::cout << "Set Default Location Main Server / \n\n";
     Directives* defaultDirective = config;
     return  defaultDirective;
 }
@@ -144,7 +143,6 @@ int IResponseParser::setServeRoot(){
     size_t cut_from = url_location.find(this->location_class_path);
     if(cut_from != std::string::npos)
     {   
-       std::cout << "url location - " << url_location << std::endl;  
        try{
             this->serve_root = url_location.substr(location_class_path.length(), url_location.length());
             /* add url location / at first (/ + favicon.ico) */

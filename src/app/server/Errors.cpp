@@ -12,7 +12,6 @@ Errors::Errors(int status, ResponseParser& response)
     setErrorMap();
     getPathFromConf(status, response);
     setDefaultErrorResponse(status);
-
 }
 
 std::string Errors::getPathFromConf(int status, ResponseParser& response){
@@ -29,7 +28,7 @@ std::string Errors::getPathFromConf(int status, ResponseParser& response){
             return error_file_path;
         }
     }
-    return NULL;
+    return "";
 }
 
 int Errors::setErrorMap(){
@@ -111,6 +110,7 @@ int Errors::setErrorMap(){
 int Errors::setDefaultErrorResponse(int status)
 {
     /* Error path is found from conf */
+	std::string default_path = "src/app/default_files/not_found.html";
     int is_default_error = 1;
     error_response = "HTTP/1.1 ";
     error_response += std::to_string(status);
@@ -122,15 +122,20 @@ int Errors::setDefaultErrorResponse(int status)
         is_default_error = 0;
     }
     else
-        this->error_file_path = "src/response/not_found.html";
-    std::ifstream ifs(this->error_file_path);
+        this->error_file_path = default_path;
+	std::cout << "In Error constructor\n" << "Error file path " << this->error_file_path << std::endl;
+    std::ifstream ifs;
+	ifs.open(this->error_file_path);
+	if(!ifs){
+		std::cout << "File is not found, trying to set default\n\n";
+		ifs.open(default_path);
+	}
 	std::string content( (std::istreambuf_iterator<char>(ifs) ),
 				(std::istreambuf_iterator<char>()    ) );
-
     error_response += "\nContent-Type:text/html\nContent-Length: ";
     error_response +=  std::to_string(content.length());
     error_response += "\n\n";
-    /* Change Error 404 from html to correct status */
+		/* Change Error 404 from html to correct status */
     if(is_default_error){
         size_t found = content.find("Error 404");
         std::string status_str = "Error ";
@@ -138,7 +143,7 @@ int Errors::setDefaultErrorResponse(int status)
         content.replace(found, status_str.length(), status_str);
     }
     error_response += content;
-
+	ifs.close();
     return 0;
 }
 

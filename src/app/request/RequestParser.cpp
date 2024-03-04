@@ -131,6 +131,7 @@ int   RequestParser::launchParse( std::string buff, int len )
       }
    }
    findReqEnd();
+   std::cout << "Content Length - " << this->content_length << "\t Body Lentgth - " << this->post_req_body.size() << std::endl;
    return 0;
 }
 

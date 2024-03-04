@@ -47,22 +47,14 @@
     <hr>
     <p>Mauris neque quam, fermentum ut nisl vitae, convallis maximus nisl. Sed mattis nunc id lorem euismod placerat. Vivamus porttitor magna enim, ac accumsan tortor cursus at. Phasellus sed ultricies mi non congue ullam corper. Praesent tincidunt sed tellus.</p>
 
-    <form action="/action_page.php" target="_blank">
+    <form action="/action_page.php" target="" method="post"  enctype="multipart/form-data" id="form">
       <div class="w3-section">
-        <label>Name</label>
-        <input class="w3-input w3-border" type="text" required name="Name">
+        <label>Image</label>
+        <input type="file" class="w3-input w3-border" name="Image" required/>
       </div>
-      <div class="w3-section">
-        <label>Email</label>
-        <input class="w3-input w3-border" type="text" required name="Email">
-      </div>
-      <div class="w3-section">
-        <label>Message</label>
-        <input class="w3-input w3-border" required name="Message">
-      </div>
-      <button type="submit" class="w3-button w3-block w3-dark-grey">Send</button>
+      <button type="submit" class="w3-button w3-block w3-dark-grey" onclick="fileUpload()">Send</button>
     </form><br>
-    <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank" class="w3-hover-text-green">w3.css</a></p>
+    <p>Powered by <a href="#" target="_blank" class="w3-hover-text-green">Webserver 42</a></p>
 
   </div>
 
@@ -70,4 +62,21 @@
 </div>
 
 </body>
+<script>
+  function fileUpload() {
+    console.log("Function was called");
+    const formData = new FormData(document.getElementById('form'));
+    fetch('/upload.py', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log('success:');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
 </html>
