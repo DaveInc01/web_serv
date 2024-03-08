@@ -1,4 +1,5 @@
 #include "IResponseParser.hpp"
+#include <sys/stat.h>
 
 int findPosition(const std::vector<int>& vec) {
     int minElement = __INT_MAX__;  // Initialize to a large value
@@ -20,7 +21,7 @@ int longestCommonPrefix(const std::string& str, const std::vector<std::string>& 
     }
 
     int maxCommonPrefix = 0;
-    
+
     for (const std::string& s : vec) {
         int commonPrefix = 0;
         while (commonPrefix < std::min(s.size(), str.size()) && s[commonPrefix] == str[commonPrefix]) {
@@ -46,4 +47,25 @@ int findIndexOfMax(const std::vector<int>& vec) {
     return maxIndex;
 }
 
+bool is_file_exists(const std::string &path)
+{
+	struct stat file_stat;
 
+	return (stat(path.c_str(), &file_stat) == 0);
+}
+
+bool is_regular_file(const std::string &path)
+{
+    struct stat file_stat;
+	stat(path.c_str(), &file_stat);
+
+	return S_ISREG(file_stat.st_mode);
+}
+
+bool is_dir(const std::string &path)
+{
+    struct stat file_stat;
+	stat(path.c_str(), &file_stat);
+
+	return S_ISDIR(file_stat.st_mode);
+}

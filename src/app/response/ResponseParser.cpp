@@ -100,17 +100,16 @@ int ResponseParser::launchResponse()
 	std::string arr="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
 	std::string my_response = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: ";
 	struct stat filestatus;
-	stat("src/www/index.html", &filestatus );
-	std::cout << this->request.getHttpReq();
+	stat("www/index.html", &filestatus );
+	// std::cout << this->request.getHttpReq();
 	my_response += std::to_string(filestatus.st_size) + "\n\n";
-	std::ifstream ifs("src/www/index.html");
+	std::ifstream ifs("www/index.html");
 	std::string content( (std::istreambuf_iterator<char>(ifs) ),
 				(std::istreambuf_iterator<char>()    ) );
 	
 	my_response	+= content;
 	this->_response = my_response;
 	ifs.close();
-	std::cout << "Serve rooooot" << this->serve_root << std::endl;
     return 0;
 };
 

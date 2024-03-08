@@ -29,6 +29,8 @@ protected:
     std::string     server_name;
     std::string     date;
     std::string     response_body;
+    std::string     boundary;
+    std::string     multipart_body;
     int             content_length;
     int             is_finish;
     int             status_code;
