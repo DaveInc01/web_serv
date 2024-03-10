@@ -1,14 +1,14 @@
 NAME = webserv
 
 SRC_ROOT = $(wildcard ./*.cpp)
-SRC_REQ_PARSER = $(wildcard ./src/app/request/*.cpp)
-SRC_RESP_PARSER = $(wildcard ./src/app/response/*.cpp)
-SRC_SERVER = $(wildcard ./src/app/server/*.cpp)
-SRC_CONFIG = $(wildcard ./src/app/config/*.cpp)
+SRC_REQ_PARSER = $(wildcard ./src/request/*.cpp)
+SRC_RESP_PARSER = $(wildcard ./src/response/*.cpp)
+SRC_SERVER = $(wildcard ./src/server/*.cpp)
+SRC_CONFIG = $(wildcard ./src/config/*.cpp)
 ALL_SRC = $(SRC_REQ_PARSER) $(SRC_RESP_PARSER) $(SRC_SERVER) $(SRC_CONFIG) $(SRC_ROOT)
 OBJ=$(ALL_SRC:.cpp=.o)
 
-CPPFLAGS = -I./src/app -g -std=c++11  #-Wall -Wextra -Werror -std=c++98
+CPPFLAGS = -I./src -g -std=c++11  #-Wall -Wextra -Werror -std=c++98
 
 RM = rm -rf
 

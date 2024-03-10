@@ -36,7 +36,7 @@ protected:
     int             status_code;
     int             http_version;
     int             have_def_location;
-	
+	int             max_body_size_bytes;
 };
 
 int findPosition(const std::vector<int>& vec);

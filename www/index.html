@@ -52,7 +52,7 @@
         <label>Image</label>
         <input type="file" class="w3-input w3-border" name="Image" required/>
       </div>
-      <button type="submit" class="w3-button w3-block w3-dark-grey" onclick="fileUpload()">Send</button>
+      <button type="submit" class="w3-button w3-block w3-dark-grey">Send</button>
     </form><br>
     <p>Powered by <a href="#" target="_blank" class="w3-hover-text-green">Webserver 42</a></p>
 
@@ -63,20 +63,20 @@
 
 </body>
 <script>
-  function fileUpload() {
-    console.log("Function was called");
-    const formData = new FormData(document.getElementById('form'));
-    fetch('/upload.py', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-        console.log('success:');
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
+//   function fileUpload() {
+//     console.log("Function was called");
+//     const formData = new FormData(document.getElementById('form'));
+//     fetch('/upload.py', {
+//         method: 'POST',
+//         body: formData
+//     })
+//     .then(response => response.text())
+//     .then(data => {
+//         console.log('success:');
+//     })
+//     .catch(error => {
+//         console.error('Error:', error);
+//     });
+// }
 </script>
 </html>

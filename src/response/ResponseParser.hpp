@@ -16,8 +16,11 @@ public:
     std::string checkErrorFromConf(int);
     int setErrorMap();
     void setResponse(std::string);
+    int checkMaxBodySize();
     std::string     _header;
 	std::string 	_response; // The final response string
 };
+
+bool is_number(const std::string& s);
 
 #endif

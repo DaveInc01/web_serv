@@ -54,10 +54,38 @@ int ResponseParser::generateGetResponse()
     return 0;
 }
 
+
+
+int ResponseParser::checkMaxBodySize(){
+	std::string max_body_size = this->corresponding_location->getClient_max_body_size();
+	std::string suffix = "kKmM";
+	if(max_body_size.size())
+	{
+		size_t pos = suffix.find(max_body_size[max_body_size.length() - 1]);
+		if(pos != std::string::npos)
+			max_body_size = max_body_size.substr(0, max_body_size.size()-1);
+		if (is_number(max_body_size))
+			this->max_body_size_bytes = atoi(max_body_size.c_str());
+		else
+			return 0;
+		if((pos == 0) || (pos == 1))
+			max_body_size_bytes *= 1000; 
+		if ((pos == 2) || (pos == 3))
+			max_body_size_bytes *= 1000000;
+		std::cout << "Max body size - " << max_body_size_bytes << std::endl;
+		if(max_body_size_bytes < this->request.getPostReqBody().size())
+		{
+			throw(413);
+		}
+	}
+	return 0;
+}
+
 int ResponseParser::generatePostResponse()
 {
-	std::cout << this->request.getContentType() << std::endl;
-    std::ofstream out("output.jpg");
+	// std::cout << this->request.getContentType() << std::endl;
+	checkMaxBodySize();
+    std::ofstream out("serve_files/" + this->request.getPostReqFilename());
 	out << this->request.getPostReqBody();
 	out.close();
     return 0;
@@ -106,7 +134,6 @@ int ResponseParser::launchResponse()
 	std::ifstream ifs("www/index.html");
 	std::string content( (std::istreambuf_iterator<char>(ifs) ),
 				(std::istreambuf_iterator<char>()    ) );
-	
 	my_response	+= content;
 	this->_response = my_response;
 	ifs.close();

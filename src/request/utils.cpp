@@ -4,7 +4,6 @@ std::string concatStrings(std::string str1, std::string str2){
     if(str1.size())
         if(str1[str1.length() - 1] != '/')
             str1.push_back('/');
-    std::cout << "str2 before " << str2 << std::endl;
     if(str2.size())
     {
         if(str2[0] == '/')

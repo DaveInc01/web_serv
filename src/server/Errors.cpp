@@ -1,6 +1,5 @@
 #include "server/Errors.hpp" 
 
-
 /* For getting a map of status codes */
 Errors::Errors(){
     setErrorMap();
@@ -24,7 +23,6 @@ std::string Errors::getPathFromConf(int status, ResponseParser& response){
             // concat root and error path
             error_file_path = response.corresponding_location->getRoot();
             error_file_path = concatStrings(error_file_path, it->second);
-            std::cout << "Error file path = " << error_file_path << std::endl;
             return error_file_path;
         }
     }
@@ -110,24 +108,19 @@ int Errors::setErrorMap(){
 int Errors::setDefaultErrorResponse(int status)
 {
     /* Error path is found from conf */
-	std::string default_path = "src/app/default_files/not_found.html";
+	std::string default_path = "src/default_files/not_found.html";
     int is_default_error = 1;
     error_response = "HTTP/1.1 ";
     error_response += std::to_string(status);
     error_response += " ";
     error_response += _status_codes.at(status);
     if(this->error_file_path.size())
-    {
-        this->error_file_path = concatStrings("src/", this->error_file_path);
         is_default_error = 0;
-    }
     else
         this->error_file_path = default_path;
-	std::cout << "In Error constructor\n" << "Error file path " << this->error_file_path << std::endl;
     std::ifstream ifs;
 	ifs.open(this->error_file_path);
 	if(!ifs){
-		std::cout << "File is not found, trying to set default\n\n";
 		ifs.open(default_path);
 	}
 	std::string content( (std::istreambuf_iterator<char>(ifs) ),

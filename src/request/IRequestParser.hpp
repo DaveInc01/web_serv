@@ -21,6 +21,7 @@ public:
    std::string getHost();
    int         getIsReqEnd();
    int         getPort();
+   std::string getPostReqFilename();
 protected:
    std::string method;
    std::string route;

@@ -50,3 +50,7 @@ int     IRequestParser::getPort()
 {
     return this->port;
 }
+
+std::string IRequestParser::getPostReqFilename(){
+    return this->post_req_filename;
+}

@@ -16,6 +16,6 @@ public:
       int   setProperties();
       int   setValue(std::string, std::string &);
       int   findReqEnd();
-      
+      void parseMultipartFormData(const std::string&, const std::string&);
       std::string getLine(int &);
 };

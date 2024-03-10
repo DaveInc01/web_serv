@@ -101,6 +101,35 @@ int RequestParser::parseQuery()
    return 0;
 }
 
+void RequestParser::parseMultipartFormData(const std::string& body, const std::string& bound) {
+   std::string delimiter = "--" + bound + "\r\n";
+   std::string endDelimiter = "--" + bound + "--";
+   
+   /* get filename*/
+   size_t pos = body.find("filename=\"");
+   size_t end;
+   if(pos != std::string::npos){
+      pos += 10;
+      end = body.find("\"", pos);
+      this->post_req_filename = body.substr(pos, end - pos);
+   }
+   /* Find body start */
+   // size_t body_start = body.find("Content-Type:", end);
+   size_t body_start = body.find("\r\n\r\n");
+
+   if(body_start != std::string::npos){
+      body_start += 4;
+      end = body.find(endDelimiter);
+      if(end != std::string::npos)
+      {
+         this->post_req_body = body.substr(body_start, end - body_start);
+      }
+      // std::string newstr = body.substr(body_start, 15);
+      // std::cout << "body_start " << body_start << std::endl;
+      // std::cout << "15 - " << newstr << std::endl;
+   }
+}
+
 int   RequestParser::launchParse( std::string buff, int len )
 {
    int char_index = 0;
@@ -140,10 +169,12 @@ int   RequestParser::launchParse( std::string buff, int len )
       }
    }
    findReqEnd();
-   // std::cout << "Content Length - " << this->content_length << "\t Body Lentgth - " << this->post_req_body.size() << std::endl;
+   // if(is_req_end)
+   // {
+   //    parseMultipartFormData(this->post_req_body, this->boundary);
+   // }
    return 0;
 }
-
 
 std::string RequestParser::getLine(int &index)
 {
@@ -190,32 +221,6 @@ std::string RequestParser::getLine(int &index)
 }
 
 
-
-std::vector<std::string> split(const std::string& s, const std::string& delimiter) {
-    std::vector<std::string> parts;
-    auto start = 0U;
-    auto end = s.find(delimiter);
-    while (end != std::string::npos) {
-        parts.push_back(s.substr(start, end - start));
-        start = end + delimiter.length();
-        end = s.find(delimiter, start);
-    }
-    parts.push_back(s.substr(start, end));
-    return parts;
-}
-
-void parseMultipartFormData(const std::string& body, const std::string& bound) {
-    std::string delimiter = "--" + bound + "\r\n";
-    std::string endDelimiter = "--" + bound + "--";
-    auto parts = split(body, delimiter);
-    
-    for (auto& part : parts) {
-        if (part.empty() || part == "\r\n" || part.find(endDelimiter) != std::string::npos) continue;
-        // Further parsing can be done here to separate part headers from the body
-        std::cout << "Part: " << part << std::endl;
-    }
-}
-
 int   RequestParser::findReqEnd()
 {
    if(this->http_req.find("\r\n\r\n") != std::string::npos)
@@ -238,13 +243,6 @@ int   RequestParser::findReqEnd()
             {
                this->is_req_end = 1;
             }
-         }
-         else if(this->boundary.size())
-         {
-// std::string body = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"text\"\r\n\r\nexample text\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--";
-            parseMultipartFormData(this->http_req, this->boundary);
-   std::cout << "In multpaaart\n";
-
          }
       }
    }
