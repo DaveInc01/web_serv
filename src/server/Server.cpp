@@ -101,7 +101,7 @@ void Server::httpIO()
             }
             else{
                 std::cout << "Accept the fd number - " << newSocket << std::endl;
-                
+
             }
         }
     }
@@ -118,6 +118,7 @@ void Server::httpIO()
                 std::pair<int, RequestParser> clients_req_elem;
                 clients_req_elem.first = newSocket;
                 clients_req_elem.second = RequestParser();
+                clients_req_elem.second.setFd(newSocket);
                 clientsReq.insert(clients_req_elem);
                 if(newSocket > max_sd)
                 {

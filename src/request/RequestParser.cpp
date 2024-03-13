@@ -5,6 +5,9 @@ RequestParser::RequestParser(){
    is_req_end = 0;
    header_line_finish = 1;
    content_length_int = 0;
+}
+RequestParser::RequestParser(int &fd){
+   this->_fd = fd;
 };
 
 int   RequestParser::setValue(std::string key, std::string &obj_property)
@@ -19,8 +22,19 @@ int   RequestParser::setValue(std::string key, std::string &obj_property)
    return -1;
 }
 
+void IRequestParser::setQueryString(){
+   int pos = route.find("?");
+   if(pos != std::string::npos)
+   {
+      ++pos;
+      query_string = route.substr(pos, (route.length() - pos));
+   }
+   std::cout << "QUERY - " <<query_string << std::endl;
+}
+
 int   RequestParser::setProperties(){
    parseRoute();
+   this->setQueryString();
    setValue("Host", this->host);
    if(this->host.length())
    {
@@ -247,4 +261,14 @@ int   RequestParser::findReqEnd()
       }
    }
    return (0);
+}
+
+int RequestParser::getFd()
+{
+    return this->_fd;
+}
+
+void RequestParser::setFd(int &fd)
+{
+   this->_fd = fd;
 }

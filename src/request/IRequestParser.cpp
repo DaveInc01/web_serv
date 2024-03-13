@@ -15,6 +15,9 @@ std::string IRequestParser::getRoute()
     return this->route;
 }
 
+std::string IRequestParser::getQueryString(){
+     return this->query_string;
+}
 
 std::string IRequestParser::getContentType()
 {

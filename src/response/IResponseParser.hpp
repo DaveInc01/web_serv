@@ -2,8 +2,8 @@
 #define IRESPONSEPARSER_HPP
 
 #include "request/RequestParser.hpp"
+// #include "cgi/Cgi.hpp"
 // #include "server/Server.hpp"
-
 class IResponseParser{
 public:
     int             setFinish();
@@ -36,7 +36,7 @@ protected:
     int             status_code;
     int             http_version;
     int             have_def_location;
-	int             max_body_size_bytes;
+	unsigned long int   max_body_size_bytes;
 };
 
 int findPosition(const std::vector<int>& vec);

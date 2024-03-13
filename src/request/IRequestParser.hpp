@@ -9,11 +9,14 @@
 #include <sys/types.h>
 #include "config/AllConfigs.hpp"
 
+
 class IRequestParser {
 public:
    std::string getUrl();
    std::string getMethod();
    std::string getRoute();
+   void        setQueryString();
+   std::string getQueryString();
    std::string getContentType();
    std::string getContentLength();
    std::string getPostReqBody();
@@ -25,6 +28,7 @@ public:
 protected:
    std::string method;
    std::string route;
+   std::string query_string;
    std::string http_v;
    std::string url;
    int         port;

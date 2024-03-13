@@ -1,5 +1,7 @@
 #include "ResponseParser.hpp"
 #include "server/Errors.hpp"
+#include "cgi/Cgi.hpp"
+
 
 ResponseParser::ResponseParser(RequestParser req, std::map<int, Config *> configs_map)
 {
@@ -85,6 +87,7 @@ int ResponseParser::generatePostResponse()
 {
 	// std::cout << this->request.getContentType() << std::endl;
 	checkMaxBodySize();
+	Cgi::execute(*this);
     std::ofstream out("serve_files/" + this->request.getPostReqFilename());
 	out << this->request.getPostReqBody();
 	out.close();
@@ -95,7 +98,6 @@ int ResponseParser::generateDeleteResponse()
 {
     return 0;
 }
-
 
 int ResponseParser::launchResponse()
 {
@@ -129,7 +131,8 @@ int ResponseParser::launchResponse()
 	std::string my_response = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: ";
 	struct stat filestatus;
 	stat("www/index.html", &filestatus );
-	// std::cout << this->request.getHttpReq();
+	std::cout << "HOST -" << this->request.getHost() << std::endl;
+	// std::cout << "URL --- " <<  this->request.getRoute() << std::endl;
 	my_response += std::to_string(filestatus.st_size) + "\n\n";
 	std::ifstream ifs("www/index.html");
 	std::string content( (std::istreambuf_iterator<char>(ifs) ),

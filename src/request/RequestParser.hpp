@@ -5,7 +5,7 @@
 class RequestParser : public IRequestParser {
 public:
       RequestParser();
-
+      RequestParser(int &);  
       int   parseUrl();
       int   parseMethod(std::string);
       int   parseRoute();
@@ -16,6 +16,9 @@ public:
       int   setProperties();
       int   setValue(std::string, std::string &);
       int   findReqEnd();
+      int   getFd();
+      void  setFd(int &);
       void parseMultipartFormData(const std::string&, const std::string&);
       std::string getLine(int &);
+      int _fd;
 };
