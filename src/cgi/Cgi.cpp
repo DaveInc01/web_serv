@@ -12,7 +12,7 @@ int Cgi::execute(ResponseParser &client) {
     signal(SIGPIPE, SIG_IGN); // TODO
     char *argv[3];
     // const std::string &argv1 = client.getCurrentLoc().getCgi(client.getExtension()).second;
-    const std::string &argv1 = "cgi/cgi_interpreters/python-cgi-mac";
+    const std::string &argv1 = "src/cgi/cgi_interpreters/python-cgi-mac";
     argv[0] = const_cast<char *>(argv1.c_str());
     const std::string &argv2 =  client.getServerRoot();
     argv[1] = const_cast<char *>(argv2.c_str());
@@ -32,28 +32,28 @@ int Cgi::execute(ResponseParser &client) {
     osf << client.request.getPostReqBody();
     if (pid == 0) {
         if (client.request.getMethod() == "POST") {
-            std::string tmp_file_name = ".tmp/file_" + std::to_string(client.request.getFd());
-            if (access("./.tmp", F_OK) != 0) {
-                if (mkdir("./.tmp", S_IRWXU) == -1) {
-                    throw std::runtime_error(std::string("mkdir: ") + strerror(errno));
-                };
-            }
-            std::fstream tmp_file;
-            tmp_file.open(tmp_file_name, std::ios::out);
-            tmp_file << client.request.getPostReqBody();
-            tmp_file.close();
-            int fd = open(tmp_file_name.c_str(), O_RDWR);
+            // std::string tmp_file_name = ".tmp/file_" + std::to_string(client.request.getFd());
+            // if (access("./.tmp", F_OK) != 0) {
+            //     if (mkdir("./.tmp", S_IRWXU) == -1) {
+            //         throw std::runtime_error(std::string("mkdir: ") + strerror(errno));
+            //     };
+            // }
+            // std::fstream tmp_file;
+            // tmp_file.open(tmp_file_name, std::ios::out);
+            // tmp_file << client.request.getPostReqBody();
+            // tmp_file.close();
+            int fd = open("log.log", O_RDWR);
             std::cout << "fd = " << fd << std::endl;
             dup2(fd, 0);
             close(fd);
         }
-        // char **envp = Cgi::initEnv(client);
+        char **envp = Cgi::initEnv(client);
 
         dup2(pipe_from_child[1], 1);
         close(pipe_from_child[0]);
         close(pipe_from_child[1]);
 
-        // int res = execve(argv[0], argv, envp);
+        int res = execve(argv[0], argv, envp);
         perror("execve: ");
         // exit(res);
         exit(1);
@@ -64,52 +64,49 @@ int Cgi::execute(ResponseParser &client) {
     return (pipe_from_child[0]);
 };
 
-// char **Cgi::initEnv(ResponseParser &client)
-// {
-//     char *pwd;
-//     // const ServerCore &srv = client.getCurrentLoc();
-//     char *clientIp = client.inet_ntoa(client.getSocketAddress()->sin_addr); 
+char **Cgi::initEnv(ResponseParser &client)
+{
+    char *pwd;
+    // const ServerCore &srv = client.getCurrentLoc();
+    // client.showHeaders();
+    pwd = getcwd(NULL, 0);
+    _env["AUTH_TYPE"] = "Basic";
+    std::string length = client.request.getContentLength();
+    if (length.empty() == false) {
+        _env["CONTENT_LENGTH"] = length;
+    }
+    _env["CONTENT_TYPE"] = client.request.getContentType();
+    _env["GATEWAY_INTERFACE"] = "CGI/1.1";
+    _env["PATH_INFO"] = client.getServerRoot();
+    _env["PATH_TRANSLATED"] = pwd + std::string("/") + client.getServerRoot();
+    _env["QUERY_STRING"] = client.request.getQueryString(); 
+    _env["REMOTE_ADDR"] = client.request.getClientIp();
+    _env["REMOTE_HOST"] = client.request.getHost();
+    _env["REMOTE_USER"] = pwd;
+    _env["REQUEST_METHOD"] = client.request.getMethod();
+    _env["SCRIPT_NAME"] = client.getServerRoot();
+    _env["SCRIPT_FILENAME"] = pwd + std::string("/") + client.getServerRoot();
+    _env["SERVER_NAME"] = "web_serv";
+    _env["SERVER_PORT"] = client.request.getPort_str();
+    _env["SERVER_PROTOCOL"] = "HTTP/1.1";
+    _env["SERVER_SOFTWARE"] = "Web_serv";
+    _env["SERVER_WRITE_PATH"] = client.corresponding_location->getUpload_path();
+    _env["UPLOAD_DIR"] = client.corresponding_location->getUpload_path();
+    _env["LC_CTYPE"] = "C.UTF-8";
+    _env["REDIRECT_STATUS"] = "true";
+	free(pwd);
 
-//     // client.showHeaders();
-//     pwd = getcwd(NULL, 0);
-//     _env["AUTH_TYPE"] = "Basic";
-//     std::string length = client.request.getContentLength();
-//     if (length.empty() == false) {
-//         _env["CONTENT_LENGTH"] = length;
-//     }
-//     _env["CONTENT_TYPE"] = client.request.getContentType();
-//     // _env["TRANSFER-ENCODING"] = client.findInMap("Transfer-Encoding");
-//     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
-//     _env["PATH_INFO"] = client.getServerRoot();
-//     _env["PATH_TRANSLATED"] = pwd + std::string("/") + client.getServerRoot();
-//     _env["QUERY_STRING"] = client.request.getQueryString(); 
-//     _env["REMOTE_ADDR"] = clientIp; // IP ADDRESS of Client try to find
-//     _env["REMOTE_HOST"] = client.request.getHost();
-//     _env["REMOTE_USER"] = pwd; // parse bellow
-//     _env["REQUEST_METHOD"] = client.getMethod();
-//     _env["SCRIPT_NAME"] = client.getPath();
-//     _env["SCRIPT_FILENAME"] = pwd + std::string("/") + client.getPath();
-//     _env["SERVER_NAME"] = "webserv";
-//     _env["SERVER_PORT"] = client.getServerPort();
-//     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
-//     _env["SERVER_SOFTWARE"] = "Webserv";
-//     _env["SERVER_WRITE_PATH"] = srv.getUploadDir();
-//     _env["UPLOAD_DIR"] = srv.getUploadDir();
-//     _env["LC_CTYPE"] = "C.UTF-8";
-//     _env["REDIRECT_STATUS"] = "true";
-// 	free(pwd);
+    char **envp = new char *[_env.size() + 1];
 
-//     char **envp = new char *[_env.size() + 1];
+	int i = 0;
+    std::ofstream ofs("env.log");
+	for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); ++it)
+	{
+		envp[i++] = strdup((it->first + "=" + it->second).c_str());
+        ofs << envp[i - 1] << std::endl;;
+	}
 
-// 	int i = 0;
-//     std::ofstream ofs("env.log");
-// 	for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); ++it)
-// 	{
-// 		envp[i++] = strdup((it->first + "=" + it->second).c_str());
-//         ofs << envp[i - 1] << std::endl;;
-// 	}
-
-// 	envp[i] = NULL;
-
-// 	return envp;
-// };
+	envp[i] = NULL;
+    // delete envp;
+	return envp;
+};

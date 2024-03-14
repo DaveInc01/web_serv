@@ -24,7 +24,10 @@ public:
    std::string getHost();
    int         getIsReqEnd();
    int         getPort();
+   std::string getPort_str();
    std::string getPostReqFilename();
+   void        setClientIp(char*);
+   char*       getClientIp();
 protected:
    std::string method;
    std::string route;
@@ -32,6 +35,7 @@ protected:
    std::string http_v;
    std::string url;
    int         port;
+   std::string port_str;
    std::string host;
    std::string content_type;
    std::string content_length;
@@ -47,6 +51,7 @@ protected:
    int         header_line_finish;
    int         is_req_end;
    std::string boundary;
+   char*       client_ip;
    
    std::map<std::string, std::string>  request;
 };

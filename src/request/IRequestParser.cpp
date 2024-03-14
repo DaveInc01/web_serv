@@ -54,6 +54,21 @@ int     IRequestParser::getPort()
     return this->port;
 }
 
+std::string IRequestParser::getPort_str()
+{
+    return this->port_str;
+}
+
 std::string IRequestParser::getPostReqFilename(){
     return this->post_req_filename;
+}
+
+void IRequestParser::setClientIp(char *cl_ip)
+{
+    this->client_ip = cl_ip;
+}
+
+char *IRequestParser::getClientIp()
+{
+    return this->client_ip;
 }

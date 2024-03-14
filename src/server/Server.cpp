@@ -101,7 +101,8 @@ void Server::httpIO()
             }
             else{
                 std::cout << "Accept the fd number - " << newSocket << std::endl;
-
+                // char *addr = inet_ntoa(srv.sin_addr);
+                // std::cout << "Client address - " << addr << std::endl; 
             }
         }
     }
@@ -119,6 +120,7 @@ void Server::httpIO()
                 clients_req_elem.first = newSocket;
                 clients_req_elem.second = RequestParser();
                 clients_req_elem.second.setFd(newSocket);
+                clients_req_elem.second.setClientIp(inet_ntoa(srv.sin_addr));
                 clientsReq.insert(clients_req_elem);
                 if(newSocket > max_sd)
                 {

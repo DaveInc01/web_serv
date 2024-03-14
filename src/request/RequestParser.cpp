@@ -29,7 +29,6 @@ void IRequestParser::setQueryString(){
       ++pos;
       query_string = route.substr(pos, (route.length() - pos));
    }
-   std::cout << "QUERY - " <<query_string << std::endl;
 }
 
 int   RequestParser::setProperties(){
@@ -40,6 +39,7 @@ int   RequestParser::setProperties(){
    {
       std::pair<std::string, std::string> p;
       p = ft_split(this->host, ':');
+      this->port_str = p.second;
       this->port = atoi(p.second.c_str());
    }
    if (this->method == "POST")
