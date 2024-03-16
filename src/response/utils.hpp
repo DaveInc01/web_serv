@@ -10,3 +10,4 @@ int findIndexOfMax(const std::vector<int>& vec);
 bool is_file_exists(const std::string &path);
 bool is_regular_file(const std::string &path);
 bool is_dir(const std::string &path);
+std::string getDirContentHTML(const std::string &dir_path); 

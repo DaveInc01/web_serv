@@ -30,18 +30,10 @@ int Cgi::execute(ResponseParser &client) {
     }
     std::ofstream osf("log.log");
     osf << client.request.getPostReqBody();
+    osf.flush();
+    osf.close();
     if (pid == 0) {
         if (client.request.getMethod() == "POST") {
-            // std::string tmp_file_name = ".tmp/file_" + std::to_string(client.request.getFd());
-            // if (access("./.tmp", F_OK) != 0) {
-            //     if (mkdir("./.tmp", S_IRWXU) == -1) {
-            //         throw std::runtime_error(std::string("mkdir: ") + strerror(errno));
-            //     };
-            // }
-            // std::fstream tmp_file;
-            // tmp_file.open(tmp_file_name, std::ios::out);
-            // tmp_file << client.request.getPostReqBody();
-            // tmp_file.close();
             int fd = open("log.log", O_RDWR);
             std::cout << "fd = " << fd << std::endl;
             dup2(fd, 0);
@@ -52,12 +44,12 @@ int Cgi::execute(ResponseParser &client) {
         dup2(pipe_from_child[1], 1);
         close(pipe_from_child[0]);
         close(pipe_from_child[1]);
-
         int res = execve(argv[0], argv, envp);
         perror("execve: ");
         // exit(res);
         exit(1);
     }
+    waitpid(pid, NULL, 30000);
     close(pipe_from_child[1]);
     // client.setCgiPID(pid);
     // client.setCgiStartTime();
