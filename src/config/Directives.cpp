@@ -1,6 +1,15 @@
 #include "Directives.hpp"
 
-Directives::Directives() {}
+Directives::Directives(): _autoindex("on"),_root("www")
+ {
+    // _methods = {"GET", "POST", "DELETE"};
+    // _index = {"index.html"};
+    _methods.push_back("GET");
+    _methods.push_back("POST");
+    _methods.push_back("DELETE");
+
+    _index.push_back("index.html");
+ }
 
 Directives::~Directives() {}
 
@@ -11,6 +20,7 @@ void Directives::add_directives(std::pair<std::string,  std::vector<std::string>
         _autoindex = (p.second)[0];
     else if(p.first == "index")
     {
+        _index.clear();
         for(int i = 0; i < p.second.size(); i++)
             _index.push_back(p.second[i]);
     }
@@ -21,11 +31,17 @@ void Directives::add_directives(std::pair<std::string,  std::vector<std::string>
     else if(p.first == "client_max_body_size")
         _client_max_body_size = (p.second)[0];
     else if (p.first == "cgi")
-        _cgi = p.second[0];
+    {
+        std::pair<std::string, std::string> elem;
+        elem.first = p.second[0];
+        elem.second = p.second[1];
+        _cgi.push_back(elem);
+    }
     else if(p.first == "return")
         _return = (p.second)[0];
     else if(p.first == "methods")
     {
+        _methods.clear();
         for(int i = 0; i < p.second.size(); i++)
             _methods.push_back(p.second[i]);
     }
@@ -78,7 +94,7 @@ std::vector<std::string>  const & Directives::getIndex() const
     return _index;
 }
 
-std::string  const & Directives::getCgi() const
+std::vector<std::pair<std::string, std::string> > const & Directives::getCgi() const
 {
     return (_cgi);
 }
@@ -108,6 +124,9 @@ void Directives::printDirective() const {
         std::cout << this->_methods[j] << " ";
 
     std::cout << std::endl;
-    std::cout << "_cgi: " << _cgi << std::endl;
+    for (int j = 0; j < _cgi.size(); j++)
+    {
+        std::cout << "_cgi: (" << _cgi[j].first << ", " << _cgi[j].second << ")" << std::endl;
+    }
     std::cout << "_return: " << _return << std::endl;
 }

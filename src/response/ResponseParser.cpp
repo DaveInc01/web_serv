@@ -1,7 +1,9 @@
 #include "ResponseParser.hpp"
 #include "server/Errors.hpp"
 #include "cgi/Cgi.hpp"
-
+#include "utils.hpp"
+#include "types/MimeTypes.hpp"
+#include "server/Errors.hpp"
 
 ResponseParser::ResponseParser(RequestParser req, std::map<int, Config *> configs_map)
 {
@@ -53,10 +55,61 @@ int ResponseParser::checkIsAloowedMethod(){
 
 int ResponseParser::generateGetResponse()
 {
+	Directives *loc = corresponding_location;
+	MimeTypes mime_types;
+	std::cout << "serve_root - " << serve_root << std::endl;
+	if (serve_root.find("favicon.ico") != std::string::npos)
+	{
+		if (!(is_file_exists(serve_root)))
+		{
+			return 0;
+		}
+	}
+
+	if (is_file_exists(serve_root))
+	{
+		if(is_regular_file(serve_root))
+		{
+			this->_response = generateResponseStringForPath(200, serve_root);
+		}
+		else
+		{
+			if(loc->_index.empty())
+			{
+				if (loc->_autoindex == "on")
+				{
+					this->_response = generateResponseStringForString(200, getDirContentHTML(serve_root));
+				}
+				else
+				{
+					throw(404);
+				}
+			}
+			else
+			{
+				bool is_404 = true;
+				for (int i = 0; i < loc->_index.size(); ++i)
+				{
+					if(is_file_exists(serve_root + loc->_index[i]) && is_regular_file(serve_root + loc->_index[i]))
+					{
+						this->_response = generateResponseStringForPath(200, serve_root + loc->_index[i]);
+						is_404 = false;
+						break;
+					}
+				}
+				if (is_404)
+				{
+					throw(404);
+				}
+			}
+		}
+	}
+	else
+	{
+		throw(404);
+	}
     return 0;
 }
-
-
 
 int ResponseParser::checkMaxBodySize(){
 	std::string max_body_size = this->corresponding_location->getClient_max_body_size();
@@ -96,6 +149,8 @@ int ResponseParser::generatePostResponse()
 
 int ResponseParser::generateDeleteResponse()
 {
+	if (std::remove(this->getServerRoot().c_str()) == -1) 
+        throw(404);
     return 0;
 }
 
@@ -127,19 +182,47 @@ int ResponseParser::launchResponse()
 		
 		// std::cout << "The response is returned staus code ---- " << status << std::endl;
 	}
-	std::string arr="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
-	std::string my_response = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: ";
-	struct stat filestatus;
-	stat("www/index.html", &filestatus );
-	std::cout << "HOST -" << this->request.getHost() << std::endl;
-	// std::cout << "URL --- " <<  this->request.getRoute() << std::endl;
-	my_response += std::to_string(filestatus.st_size) + "\n\n";
-	std::ifstream ifs("www/index.html");
-	std::string content( (std::istreambuf_iterator<char>(ifs) ),
-				(std::istreambuf_iterator<char>()    ) );
-	my_response	+= content;
-	this->_response = my_response;
-	ifs.close();
+//	std::string arr="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
+//	std::string my_response = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: ";
+//	struct stat filestatus;
+//	stat("www/index.html", &filestatus );
+//	std::cout << "HOST -" << this->request.getHost() << std::endl;
+//	// std::cout << "URL --- " <<  this->request.getRoute() << std::endl;
+//	my_response += std::to_string(filestatus.st_size) + "\n\n";
+//	std::ifstream ifs("www/index.html");
+//	std::string content( (std::istreambuf_iterator<char>(ifs) ),
+//				(std::istreambuf_iterator<char>()    ) );
+//	my_response	+= content;
+//	this->_response = my_response;
+//	ifs.close();
     return 0;
 };
 
+std::string ResponseParser::getContentLengthLine(const std::string &path)
+{
+	std::string res("Content-Length: ");
+	struct stat filestatus;
+	stat(path.c_str(), &filestatus );
+	res+= std::to_string(filestatus.st_size) + "\n";
+	return res;
+}
+
+std::string ResponseParser::generateResponseStringForPath(const int status_code, const std::string &path)
+{
+	Errors err;
+	std::string resp = err.getStatusLine(status_code) + MimeTypes::getContentTypeLine(path) + getContentLengthLine(path) + "\n";
+	std::ifstream ifs(path);
+	std::string content( (std::istreambuf_iterator<char>(ifs) ),
+						(std::istreambuf_iterator<char>()) );
+	resp += content;
+	ifs.close();
+	return resp;
+}
+
+std::string ResponseParser::generateResponseStringForString(const int status_code, const std::string &content)
+{
+	Errors err;
+	std::string resp = err.getStatusLine(status_code) + "Content-Type:text/html\nContent-Length: " + std::to_string(content.length()) + "\n\n";
+	resp += content;
+	return resp;
+}

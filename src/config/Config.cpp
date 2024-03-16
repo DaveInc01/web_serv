@@ -1,7 +1,7 @@
 #include "AllConfigs.hpp"
 #include "Config.hpp"
 
-Config::Config() : _listen("localhost")
+Config::Config() : _host("0.0.0.0"),_port(8000)
 {
 }
 
@@ -102,7 +102,10 @@ void Config::printConfig() const {
         std::cout << this->_methods[j] << " ";
 
     std::cout << std::endl;
-    std::cout << "_cgi: " << this->_cgi << std::endl;
+    for (int j = 0; j < this->_cgi.size(); j++)
+    {
+        std::cout << "_cgi: (" << this->_cgi[j].first << ", " << this->_cgi[j].second << ")" << std::endl;
+    }
     std::cout << "_return: " << this->_return << std::endl;
 
 }
@@ -110,8 +113,25 @@ void Config::printConfig() const {
 void Config::sum_func()
 {
     size_t pos = _listen.find(":");
-    _host = _listen.substr(0, pos);
-    std::string str = _listen.substr(pos + 1);
-    _port = atoi(str.c_str());
+    if (pos != std::string::npos) {
+        
+        _host = _listen.substr(0, pos);
+        if(_host != "127.0.0.1" && _host != "0.0.0.0" && _host != "localhost")
+        {
+            throw std::invalid_argument("failed to bind");
+        }
+        std::string str = _listen.substr(pos + 1);
+        _port = atoi(str.c_str());
+    }
+    else {
+        if (_listen.find(".") != std::string::npos) {
+            _host = _listen;
+            if(_host != "127.0.0.1" && _host != "0.0.0.0" && _host != "localhost")
+                throw std::invalid_argument("failed to bind");
+        }
+        else {
+            if (atoi(_listen.c_str()) != 0)
+                _port = atoi(_listen.c_str());
+        }
+    }
 }
-

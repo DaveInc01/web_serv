@@ -30,7 +30,7 @@ public:
     std::string _client_max_body_size;
     std::vector<std::pair<std::string, std::string> > _error_page;
     std::vector<std::string> _methods;
-    std::string _cgi;
+    std::vector<std::pair<std::string, std::string> > _cgi;
     std::string _return;
 
     std::string const & getAutoindex() const;
@@ -40,7 +40,7 @@ public:
     std::string const &  getClient_max_body_size() const;
     std::vector<std::pair<std::string, std::string> > const &  getError_page() const;
     std::vector<std::string> const &  getMethods() const;
-    std::string const &  getCgi() const;
+    std::vector<std::pair<std::string, std::string> > const &  getCgi() const;
     std::string const &  getReturn() const;
     
     void printDirective() const;

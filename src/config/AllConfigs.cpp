@@ -53,6 +53,7 @@ void AllConfigs::make_location(std::string &s, Config &S)
         {
             if(key == "location")
             {
+                
                 ss >> mkey; // to pass from "location" to mkey 
                 ss >> tok; // to pass from "mkey" to "{"
                 ss >> key; // to pass from "{" to next word key
@@ -76,7 +77,12 @@ void AllConfigs::make_location(std::string &s, Config &S)
         }
     }
     std::pair<std::string, Directives *> p;
-    p.first = mkey;
+    if(mkey.find_last_of('/') == mkey.size()-1 && mkey.size() != 1)
+    {
+        p.first = mkey.substr(0,mkey.size()-1);
+    }
+    else
+        p.first = mkey;
     p.second = m;
     S.add_locations(p);
 }
@@ -107,7 +113,8 @@ Config *AllConfigs::makeServer(const std::string &file)
     std::vector <std::string> value;
     std::vector<std::string> fv;
 
-
+    std::string str_s = ss.str();
+    size_t pos = str_s.find("\n");
     while(getline(ss, tok, ';'))
     {
         fv.push_back(tok);
@@ -158,7 +165,7 @@ void AllConfigs::dir_is_valid(std::string dir, int from)
     }
 
 }
-void AllConfigs::readConff()
+void AllConfigs:: readConff()
 {
     std::ifstream fin("src/config/config2.conf");
     std::string line;
@@ -180,7 +187,6 @@ void AllConfigs::readConff()
 
     while(full.size() > 0)
     {
-        
         _servsCount++;
         size_t serv_end = find_server_end(full);
         std::string serv = full.substr(0, serv_end + 1);

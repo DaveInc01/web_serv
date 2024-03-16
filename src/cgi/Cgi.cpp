@@ -49,7 +49,7 @@ int Cgi::execute(ResponseParser &client) {
         // exit(res);
         exit(1);
     }
-    waitpid(pid, NULL, 30000);
+    // waitpid(pid, NULL, 30000);
     close(pipe_from_child[1]);
     // client.setCgiPID(pid);
     // client.setCgiStartTime();
@@ -99,6 +99,5 @@ char **Cgi::initEnv(ResponseParser &client)
 	}
 
 	envp[i] = NULL;
-    // delete envp;
 	return envp;
 };

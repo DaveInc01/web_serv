@@ -14,6 +14,9 @@ public:
     int generatePostResponse();
     int generateDeleteResponse();
     std::string checkErrorFromConf(int);
+	std::string getContentLengthLine(const std::string &path);
+	std::string generateResponseStringForPath(const int status_code, const std::string &path);
+	std::string generateResponseStringForString(const int status_code, const std::string &content);
     int setErrorMap();
     void setResponse(std::string);
     int checkMaxBodySize();

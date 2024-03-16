@@ -104,9 +104,9 @@ std::string getDirContentHTML(const std::string &dir_path)
 	for (int i = 0; i< vec.size(); i++)
 	{
 		struct stat tmp_info;
-		std::string file_path("/Users/tumolabs/Desktop/autoindex/" + vec[i]);
+		std::string file_path(dir_path + vec[i]);
 		stat(file_path.c_str(), &tmp_info);
-		dir_html += "\n<tr>\n\t<td><a href=/Users/tumolabs/Desktop/autoindex/" + vec[i] + ">" + vec[i] + "</a><br>";
+		dir_html += "\n<tr>\n\t<td><a href=" + dir_path + vec[i] + ">" + vec[i] + "</a><br>";
 		char  *time = ctime(&info.st_mtime);
 		dir_html += "</td>\n\t<td>" + static_cast<std::string>(time) + "</td>\n\t<td>";
 		std::string tmp = std::to_string(tmp_info.st_size);
