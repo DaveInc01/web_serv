@@ -23,7 +23,7 @@ int   RequestParser::setValue(std::string key, std::string &obj_property)
 }
 
 void IRequestParser::setQueryString(){
-   int pos = route.find("?");
+   unsigned long pos = route.find("?");
    if(pos != std::string::npos)
    {
       ++pos;
@@ -79,8 +79,8 @@ int RequestParser::parseMethod(std::string line)
 int   RequestParser::parseRoute()
 {
    std::string line = this->request.find("start")->second;
-   int start = line.find('/');
-   int end = line.find(' ', start);
+   unsigned long start = line.find('/');
+   unsigned long end = line.find(' ', start);
    if (start != std::string::npos && end != std::string::npos)
    {
       try{
@@ -97,7 +97,7 @@ int   RequestParser::parseRoute()
 
 int   RequestParser::parseHttpVersion(std::string line)
 {
-   int sub_start = line.rfind('/');
+   unsigned long sub_start = line.rfind('/');
    if(sub_start != std::string::npos)
    {
       try{

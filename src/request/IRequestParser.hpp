@@ -39,7 +39,7 @@ protected:
    std::string host;
    std::string content_type;
    std::string content_length;
-   int         content_length_int;
+   unsigned long content_length_int;
    std::string transfer_encoding;
    std::string buff;
    std::string post_req_filename;

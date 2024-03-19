@@ -10,7 +10,7 @@ public:
     Config*         getCorrespondingServer();
     int             setCorrespondingLocation();
     Directives      *getCorrespondingLocation(Config*);
-    Config          *getMatchedServerName(std::vector<Config *>, int, std::string);
+    Config          *getMatchedServerName(std::vector<Config *>, std::string);
     int             checkDefaultLocation(Config*);
     int             findInVect(std::string, Config*);
     int             setServeRoot();

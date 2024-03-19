@@ -46,7 +46,7 @@ void AllConfigs::make_location(std::string &s, Config &S)
     {
         fv.push_back(tok);
     }
-    for(int i = 0; i < fv.size(); ++i)
+    for(unsigned long i = 0; i < fv.size(); ++i)
     {
         std::stringstream ss(fv[i]);
         while(ss >> key)
@@ -114,12 +114,12 @@ Config *AllConfigs::makeServer(const std::string &file)
     std::vector<std::string> fv;
 
     std::string str_s = ss.str();
-    size_t pos = str_s.find("\n");
+    // size_t pos = str_s.find("\n");
     while(getline(ss, tok, ';'))
     {
         fv.push_back(tok);
     }
-    for(int i = 0; i < fv.size(); ++i)
+    for(unsigned long i = 0; i < fv.size(); ++i)
     {
         std::stringstream ss(fv[i]);
         while(ss >> key)
@@ -203,7 +203,7 @@ void    AllConfigs::check_validity(std::string const &full)const
 void    AllConfigs::check_parentheses(std::string const &full)const
 {
     int p = 0;
-    for(int i = 0; i < full.size(); ++i)
+    for(unsigned long i = 0; i < full.size(); ++i)
     {
         if(full[i] == '{')
         {

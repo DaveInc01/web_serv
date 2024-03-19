@@ -1,4 +1,5 @@
 #include "IRequestParser.hpp"
+#include "utils.hpp"
 
 std::string concatStrings(std::string str1, std::string str2){
     if(str1.size())

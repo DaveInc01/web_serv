@@ -44,7 +44,7 @@ int Cgi::execute(ResponseParser &client) {
         dup2(pipe_from_child[1], 1);
         close(pipe_from_child[0]);
         close(pipe_from_child[1]);
-        int res = execve(argv[0], argv, envp);
+        execve(argv[0], argv, envp);
         perror("execve: ");
         // exit(res);
         exit(1);

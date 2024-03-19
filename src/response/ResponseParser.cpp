@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "types/MimeTypes.hpp"
 #include "server/Errors.hpp"
+#include "request/utils.hpp"
 
 ResponseParser::ResponseParser(RequestParser req, std::map<int, Config *> configs_map)
 {
@@ -42,7 +43,9 @@ std::string ResponseParser::checkErrorFromConf(int status)
 int ResponseParser::checkIsAloowedMethod(){
 	std::string req_method = this->request.getMethod();
 	std::vector<std::string> http_methods;
-	http_methods.insert(http_methods.end(), {"GET", "POST", "DELETE"});
+	http_methods.push_back("GET");
+	http_methods.push_back("POST");
+	http_methods.push_back("DELETE");
 	std::vector<std::string>::iterator found = std::find(http_methods.begin(), http_methods.end(), req_method);
 	if(found == http_methods.end())
 		throw(405);
@@ -64,6 +67,15 @@ int ResponseParser::generateGetResponse()
 		{
 			return 0;
 		}
+	}
+
+	if (!loc->_return.empty())
+	{
+		Errors err;
+		this->_response = err.getStatusLine(302);
+		this->_response += "Location: " + loc->getReturn() + "\n";
+		this->_response += "Content-Length: 0\n\n";
+		return 0;
 	}
 
 	if (is_file_exists(serve_root))
@@ -88,11 +100,12 @@ int ResponseParser::generateGetResponse()
 			else
 			{
 				bool is_404 = true;
-				for (int i = 0; i < loc->_index.size(); ++i)
+				for (unsigned long i = 0; i < loc->_index.size(); ++i)
 				{
-					if(is_file_exists(serve_root + loc->_index[i]) && is_regular_file(serve_root + loc->_index[i]))
+					std::string concat_paths = concatStrings(serve_root, loc->_index[i]);
+					if(is_file_exists(concat_paths) && is_regular_file(concat_paths))
 					{
-						this->_response = generateResponseStringForPath(200, serve_root + loc->_index[i]);
+						this->_response = generateResponseStringForPath(200, concat_paths);
 						is_404 = false;
 						break;
 					}

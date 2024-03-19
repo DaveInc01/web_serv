@@ -175,13 +175,13 @@ void Server::httpIO()
 			if(clientsResp.at(sd)._response.length() > SEND_SIZE)
 			{
 				/* Response is bigger than SEND_SIZE */
-            	int send_res = send(sd, clientsResp.at(sd)._response.c_str(), SEND_SIZE,0);
+            	send(sd, clientsResp.at(sd)._response.c_str(), SEND_SIZE,0);
 				clientsResp.at(sd)._response = clientsResp.at(sd)._response.substr(SEND_SIZE, (clientsResp.at(sd)._response.length() - SEND_SIZE));
 				// FD_ZERO(&tmpWritefds);
 				break ;
 			}
 			else{
-            	int send_res = send(sd, clientsResp.at(sd)._response.c_str(), clientsResp.at(sd)._response.size(), 0);
+            	send(sd, clientsResp.at(sd)._response.c_str(), clientsResp.at(sd)._response.size(), 0);
 				getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
 				std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
 				
@@ -235,12 +235,7 @@ int Server::launchServer()
 
 int Server::getServersCountFromConf()
 {   
-    int p = 8003;
-    std::vector<std::string> tmpListens = {"localhost:8001", "localhost:8001", "127.0.0.1:8001"};
-    std::vector<std::vector<std::string> > tmpServerNames = {{"localhost:800", "facobook"}, {"localhost:80"}, {"localhost", "youtube"}};
-
     std::map<int, Config *>::iterator it;
-    int i = 0;
     for (it = configs_map.begin(); it != configs_map.end(); ++it)
     {
         /* Check unique ports and add to vector from Server class */

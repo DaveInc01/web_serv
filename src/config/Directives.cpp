@@ -21,7 +21,7 @@ void Directives::add_directives(std::pair<std::string,  std::vector<std::string>
     else if(p.first == "index")
     {
         _index.clear();
-        for(int i = 0; i < p.second.size(); i++)
+        for(unsigned long i = 0; i < p.second.size(); i++)
             _index.push_back(p.second[i]);
     }
     else if (p.first == "root")
@@ -42,7 +42,7 @@ void Directives::add_directives(std::pair<std::string,  std::vector<std::string>
     else if(p.first == "methods")
     {
         _methods.clear();
-        for(int i = 0; i < p.second.size(); i++)
+        for(unsigned long i = 0; i < p.second.size(); i++)
             _methods.push_back(p.second[i]);
     }
     else if(p.first == "error_page")
@@ -109,22 +109,22 @@ void Directives::printDirective() const {
    
     std::cout << "_autoIndex: " << _autoindex << std::endl;
     std::cout << "_index: ";
-    for (int j = 0; j < _index.size(); j++) {
+    for (unsigned long j = 0; j < _index.size(); j++) {
         std::cout << _index[j] << " "; 
     }
     std::cout << "\n_root: " << _root << std::endl;
     std::cout << "_upload_path: " << _upload_path << std::endl;
     std::cout << "_client_max_body_size: " << _client_max_body_size << std::endl;
-    for (int j = 0; j < _error_page.size(); j++)
+    for (unsigned long j = 0; j < _error_page.size(); j++)
     {
         std::cout << "_error_page: (" << _error_page[j].first << ", " << _error_page[j].second << ")" << std::endl;
     }
     std::cout << "_methods: ";
-    for (int j = 0; j < _methods.size(); j++)
+    for (unsigned long j = 0; j < _methods.size(); j++)
         std::cout << this->_methods[j] << " ";
 
     std::cout << std::endl;
-    for (int j = 0; j < _cgi.size(); j++)
+    for (unsigned long j = 0; j < _cgi.size(); j++)
     {
         std::cout << "_cgi: (" << _cgi[j].first << ", " << _cgi[j].second << ")" << std::endl;
     }

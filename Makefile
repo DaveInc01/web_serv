@@ -23,7 +23,7 @@ OBJ=$(ALL_SRC:.cpp=.o)
 ALL_SRC = $(wildcard ./src/*/*.cpp) $(SRC_ROOT)
 ALL_HPP = $(wildcard ./src/*/*.hpp)
 
-CPPFLAGS = -I./src -g -std=c++11  #-Wall -Wextra -Werror -std=c++98
+CPPFLAGS = -I./src -g -Wall -Wextra -Werror -std=c++98
 
 RM = rm -rf
 

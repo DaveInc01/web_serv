@@ -56,7 +56,7 @@ Directives *IResponseParser::getCorrespondingLocation(Config* config){
     return  defaultDirective;
 }
 
-Config *IResponseParser::getMatchedServerName(std::vector<Config *> same_ports, int req_port, std::string req_host_name)
+Config *IResponseParser::getMatchedServerName(std::vector<Config *> same_ports, std::string req_host_name)
 {
     std::vector<int> name_positions;
     std::vector<std::string>::iterator servNameIt;
@@ -114,7 +114,7 @@ Config* IResponseParser::getCorrespondingServer()
     if (same_ports.size() == 1)
         return(same_ports.at(0));
     else
-        return getMatchedServerName(same_ports, req_port, this->request.getHost());
+        return getMatchedServerName(same_ports, this->request.getHost());
 }
 
 int IResponseParser::findInVect(std::string url_location, Config * config)
