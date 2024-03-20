@@ -12,7 +12,7 @@ int Cgi::execute(ResponseParser &client) {
     signal(SIGPIPE, SIG_IGN); // TODO
     char *argv[3];
     // const std::string &argv1 = client.getCurrentLoc().getCgi(client.getExtension()).second;
-    const std::string &argv1 = "src/cgi/cgi_interpreters/python-cgi-mac";
+    const std::string &argv1 = PYTHON_CGI_PATH;
     argv[0] = const_cast<char *>(argv1.c_str());
     const std::string &argv2 =  client.getServerRoot();
     argv[1] = const_cast<char *>(argv2.c_str());
@@ -49,7 +49,7 @@ int Cgi::execute(ResponseParser &client) {
         // exit(res);
         exit(1);
     }
-    // waitpid(pid, NULL, 30000);
+    waitpid(pid, NULL, 0);
     close(pipe_from_child[1]);
     // client.setCgiPID(pid);
     // client.setCgiStartTime();

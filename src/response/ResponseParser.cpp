@@ -67,7 +67,7 @@ int ResponseParser::generateGetResponse()
 		{
 			return 0;
 		}
-	}
+	}	
 
 	if (!loc->_return.empty())
 	{
@@ -153,7 +153,13 @@ int ResponseParser::generatePostResponse()
 {
 	// std::cout << this->request.getContentType() << std::endl;
 	checkMaxBodySize();
-	Cgi::execute(*this);
+	std::cout << this->request.getContentType() << std::endl;
+	if(this->request.getIsMultipart())
+	{
+		int fd = Cgi::execute(*this);
+		close(fd);
+		this->_response = "HTTP/1.1 204 OK\n";
+	}
     std::ofstream out("serve_files/" + this->request.getPostReqFilename());
 	out << this->request.getPostReqBody();
 	out.close();
@@ -195,19 +201,19 @@ int ResponseParser::launchResponse()
 		
 		// std::cout << "The response is returned staus code ---- " << status << std::endl;
 	}
-//	std::string arr="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
-//	std::string my_response = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: ";
-//	struct stat filestatus;
-//	stat("www/index.html", &filestatus );
-//	std::cout << "HOST -" << this->request.getHost() << std::endl;
-//	// std::cout << "URL --- " <<  this->request.getRoute() << std::endl;
-//	my_response += std::to_string(filestatus.st_size) + "\n\n";
-//	std::ifstream ifs("www/index.html");
-//	std::string content( (std::istreambuf_iterator<char>(ifs) ),
-//				(std::istreambuf_iterator<char>()    ) );
-//	my_response	+= content;
-//	this->_response = my_response;
-//	ifs.close();
+	// std::string arr="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
+	// std::string my_response = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: ";
+	// struct stat filestatus;
+	// stat("www/index.html", &filestatus );
+	// std::cout << "HOST -" << this->request.getHost() << std::endl;
+	// // std::cout << "URL --- " <<  this->request.getRoute() << std::endl;
+	// my_response += std::to_string(filestatus.st_size) + "\n\n";
+	// std::ifstream ifs("www/index.html");
+	// std::string content( (std::istreambuf_iterator<char>(ifs) ),
+	// 			(std::istreambuf_iterator<char>()    ) );
+	// my_response	+= content;
+	// this->_response = my_response;
+	// ifs.close();
     return 0;
 };
 

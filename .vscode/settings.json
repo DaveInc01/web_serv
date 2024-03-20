@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.dot": "python",
         "array": "cpp",
         "atomic": "cpp",
         "bit": "cpp",
@@ -84,6 +85,7 @@
         "thread": "cpp",
         "ranges": "cpp",
         "stop_token": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "__bits": "cpp"
     }
 }

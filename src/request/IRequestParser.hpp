@@ -28,6 +28,7 @@ public:
    std::string getPostReqFilename();
    void        setClientIp(char*);
    char*       getClientIp();
+   bool        getIsMultipart();
 protected:
    std::string method;
    std::string route;
@@ -52,7 +53,7 @@ protected:
    int         is_req_end;
    std::string boundary;
    char*       client_ip;
-   
+   bool        is_multipart;
    std::map<std::string, std::string>  request;
 };
 

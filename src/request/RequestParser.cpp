@@ -5,6 +5,7 @@ RequestParser::RequestParser(){
    is_req_end = 0;
    header_line_finish = 1;
    content_length_int = 0;
+   is_multipart = false;
 }
 RequestParser::RequestParser(int &fd){
    this->_fd = fd;
@@ -47,6 +48,7 @@ int   RequestParser::setProperties(){
       setValue("Content-Type", this->content_type);
       if(this->content_type.find("multipart/form-data") != std::string::npos)
       {
+         is_multipart = true;
          size_t pos = this->content_type.find("boundary=");
          if(pos != std::string::npos)
          {
