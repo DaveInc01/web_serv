@@ -46,6 +46,7 @@ int   RequestParser::setProperties(){
    if (this->method == "POST")
    {
       setValue("Content-Type", this->content_type);
+	  setValue("Content-Disposition", this->content_disposition);
       if(this->content_type.find("multipart/form-data") != std::string::npos)
       {
          is_multipart = true;
@@ -86,7 +87,14 @@ int   RequestParser::parseRoute()
    if (start != std::string::npos && end != std::string::npos)
    {
       try{
-         this->route = line.substr(start, (end - start));
+		this->route = line.substr(start, (end - start));
+		if (this->route.size() > 1)
+		{
+			if(this->route[this->route.size() - 1] == '/')
+			{
+				this->route = this->route.erase(this->route.size()-1);
+			}
+		}
       }
       catch(std::exception &e)
       {
@@ -185,10 +193,8 @@ int   RequestParser::launchParse( std::string buff, int len )
       }
    }
    findReqEnd();
-   // if(is_req_end)
-   // {
-   //    parseMultipartFormData(this->post_req_body, this->boundary);
-   // }
+//    if (!(line.length()))
+// 		this->is_req_end = 1;
    return 0;
 }
 

@@ -22,7 +22,7 @@ class ResponseParser;
 class Cgi
 {
     public:
-        static int execute(ResponseParser &client);
+		static int execute(ResponseParser &client, const std::string &cgi_path = "");
         static char **initEnv(ResponseParser &client);
     private:
         Cgi();

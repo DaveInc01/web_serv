@@ -145,3 +145,8 @@ std::string getDirContentHTML(const std::string &dir_path)
 	return (dir_html);
 	// return EXIT_FAILURE;
 }
+
+unsigned long long getCurrentTimeMilliseconds() {
+    time_t now = time(0);
+    return static_cast<unsigned long long>(now) * 1000;
+}

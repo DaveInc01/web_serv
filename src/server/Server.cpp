@@ -175,17 +175,13 @@ void Server::httpIO()
 			if(clientsResp.at(sd)._response.length() > SEND_SIZE)
 			{
 				/* Response is bigger than SEND_SIZE */
-                // if(clientsResp.at(sd).request.getMethod() == "GET")
-                if(clientsResp.at(sd)._response.size())
-            	    send(sd, clientsResp.at(sd)._response.c_str(), SEND_SIZE,0);
+            	send(sd, clientsResp.at(sd)._response.c_str(), SEND_SIZE,0);
 				clientsResp.at(sd)._response = clientsResp.at(sd)._response.substr(SEND_SIZE, (clientsResp.at(sd)._response.length() - SEND_SIZE));
 				// FD_ZERO(&tmpWritefds);
 				break ;
 			}
 			else{
-                // if(clientsResp.at(sd).request.getMethod() == "GET")
-                if(clientsResp.at(sd)._response.size())
-            	    send(sd, clientsResp.at(sd)._response.c_str(), clientsResp.at(sd)._response.size(), 0);
+            	send(sd, clientsResp.at(sd)._response.c_str(), clientsResp.at(sd)._response.size(), 0);
 				getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
 				std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
 				

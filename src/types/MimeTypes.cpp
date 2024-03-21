@@ -105,3 +105,14 @@ std::string MimeTypes::getContentTypeLine(const std::string &path)
 	res += getContentType(path) + "\n";
 	return res;
 }
+
+std::string MimeTypes::findInMapValue(const std::string &type){
+	for(std::map<std::string, std::string>::iterator it = mime_types.begin(); it != mime_types.end(); it++)
+	{
+		if(it->second == type)
+		{
+			return it->first;
+		}
+	}
+	return "";
+}

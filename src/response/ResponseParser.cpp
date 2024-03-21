@@ -13,7 +13,6 @@ ResponseParser::ResponseParser(RequestParser req, std::map<int, Config *> config
     this->configs_map = configs_map;
     this->setCorrespondingLocation();
 	this->launchResponse();
-	// this->setErrorMap();
 }
 
 void ResponseParser::setResponse(std::string r){
@@ -58,16 +57,16 @@ int ResponseParser::checkIsAloowedMethod(){
 
 int ResponseParser::generateGetResponse()
 {
+	std::cout << "mmm--- serve_root = " << serve_root << std::endl;
 	Directives *loc = corresponding_location;
 	MimeTypes mime_types;
-	std::cout << "serve_root - " << serve_root << std::endl;
 	if (serve_root.find("favicon.ico") != std::string::npos)
 	{
 		if (!(is_file_exists(serve_root)))
 		{
 			return 0;
 		}
-	}	
+	}
 
 	if (!loc->_return.empty())
 	{
@@ -76,6 +75,28 @@ int ResponseParser::generateGetResponse()
 		this->_response += "Location: " + loc->getReturn() + "\n";
 		this->_response += "Content-Length: 0\n\n";
 		return 0;
+	}
+
+	if (!loc->getCgi().empty())
+	{
+		size_t pos = serve_root.rfind(".");
+		std::string ext;
+		if (pos != std::string::npos)
+		{
+			ext = serve_root.substr(pos + 1);
+		}
+		std::vector<std::pair<std::string, std::string> >::const_iterator it = loc->getCgi().begin();
+		for (it = loc->getCgi().begin(); it != loc->getCgi().end(); ++it)
+		{
+			if (!ext.empty() && ext == it->first)
+			{
+				int fd = Cgi::execute(*this, it->second);
+				this->_response = "HTTP/1.1 204 OK\n";
+				//TODO get content from fd
+				close(fd);
+				return 0;
+			}
+		}
 	}
 
 	if (is_file_exists(serve_root))
@@ -149,20 +170,54 @@ int ResponseParser::checkMaxBodySize(){
 	return 0;
 }
 
-int ResponseParser::generatePostResponse()
+void ResponseParser::postWithoutCgi()
 {
-	// std::cout << this->request.getContentType() << std::endl;
-	checkMaxBodySize();
-	std::cout << this->request.getContentType() << std::endl;
-	if(this->request.getIsMultipart())
+	MimeTypes types;
+	std::string file_type = types.findInMapValue(this->request.getContentType());
+	std::string filename;
+	filename = this->request.getContentDisposition();
+	if(filename.size())
 	{
-		int fd = Cgi::execute(*this);
-		close(fd);
-		this->_response = "HTTP/1.1 204 OK\n";
+		size_t pos = filename.find("filename=");
+		if (pos != std::string::npos) {
+			filename = filename.substr(pos + 10); // 10 is the length of "filename="
+			filename = filename.substr(1, filename.size() - 2); // Remove quotes
+		}
 	}
-    std::ofstream out("serve_files/" + this->request.getPostReqFilename());
+	else{
+		filename = intToString<unsigned long long>(getCurrentTimeMilliseconds());
+	}
+	if(!file_type.size())
+	{
+		file_type = ".txt";
+	}
+	filename += file_type;
+	std::string upl_path = this->corresponding_location->getUpload_path();
+	if((upl_path.size()) && (upl_path[upl_path[upl_path.length()]] != '/'))
+		upl_path += '/';
+	std::ofstream out(upl_path + filename);
 	out << this->request.getPostReqBody();
 	out.close();
+}
+
+int ResponseParser::generatePostResponse()
+{
+	checkMaxBodySize();
+	if(this->request.getIsMultipart())
+	{
+		int fd = Cgi::execute(*this, "");
+		close(fd);
+	}
+	else if(this->request.getContentType().size())
+	{
+		this->postWithoutCgi();
+	}
+	else{
+		throw(400);
+	}
+    this->_response ="HTTP/1.1 204 No Content\r\n"
+            "Content-Length: 0\r\n"
+            "\r\n";
     return 0;
 }
 
@@ -193,13 +248,10 @@ int ResponseParser::launchResponse()
 	}
 	catch(int status)
 	{
-		
 		Errors *e = new Errors(status, *this);
 		this->_response = e->getErrorResponse();
 		delete e;
 		return 0;
-		
-		// std::cout << "The response is returned staus code ---- " << status << std::endl;
 	}
 	// std::string arr="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
 	// std::string my_response = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: ";

@@ -20,6 +20,7 @@ public:
     int setErrorMap();
     void setResponse(std::string);
     int checkMaxBodySize();
+	void postWithoutCgi();
     std::string     _header;
 	std::string 	_response; // The final response string
 };

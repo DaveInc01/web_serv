@@ -8,11 +8,13 @@
 
 std::map<std::string, std::string> Cgi::_env;
 
-int Cgi::execute(ResponseParser &client) {
+int Cgi::execute(ResponseParser &client, const std::string &cgi_path) {
     signal(SIGPIPE, SIG_IGN); // TODO
     char *argv[3];
     // const std::string &argv1 = client.getCurrentLoc().getCgi(client.getExtension()).second;
-    const std::string &argv1 = PYTHON_CGI_PATH;
+    // const std::string &argv1 = PYTHON_CGI_PATH;
+	const std::string &argv1 = cgi_path.empty() ? PYTHON_CGI_PATH : cgi_path;
+	std::cout << "cgi path" << argv1 << std::endl;
     argv[0] = const_cast<char *>(argv1.c_str());
     const std::string &argv2 =  client.getServerRoot();
     argv[1] = const_cast<char *>(argv2.c_str());
@@ -28,16 +30,18 @@ int Cgi::execute(ResponseParser &client) {
     if (pid == -1) {
         throw (500);
     }
-    std::ofstream osf("log.log");
+	std::string tmp_file_name = intToString<int>(client.request.getFd()) + "_log.log";
+    std::ofstream osf(tmp_file_name);
     osf << client.request.getPostReqBody();
     osf.flush();
     osf.close();
     if (pid == 0) {
         if (client.request.getMethod() == "POST") {
-            int fd = open("log.log", O_RDWR);
+            int fd = open(tmp_file_name.c_str(), O_RDWR);
             std::cout << "fd = " << fd << std::endl;
             dup2(fd, 0);
             close(fd);
+			std::remove(tmp_file_name.c_str());
         }
         char **envp = Cgi::initEnv(client);
 
@@ -82,7 +86,10 @@ char **Cgi::initEnv(ResponseParser &client)
     _env["SERVER_PORT"] = client.request.getPort_str();
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
     _env["SERVER_SOFTWARE"] = "Web_serv";
-    _env["SERVER_WRITE_PATH"] = client.corresponding_location->getUpload_path();
+	std::string upl_path = client.corresponding_location->getUpload_path();
+	if((upl_path.size()) && (upl_path[upl_path[upl_path.length()]] != '/'))
+		upl_path += '/';
+    _env["SERVER_WRITE_PATH"] = upl_path;
     _env["UPLOAD_DIR"] = client.corresponding_location->getUpload_path();
     _env["LC_CTYPE"] = "C.UTF-8";
     _env["REDIRECT_STATUS"] = "true";
@@ -97,7 +104,6 @@ char **Cgi::initEnv(ResponseParser &client)
 		envp[i++] = strdup((it->first + "=" + it->second).c_str());
         ofs << envp[i - 1] << std::endl;;
 	}
-
 	envp[i] = NULL;
 	return envp;
 };
