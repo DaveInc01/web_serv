@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-#define SEND_SIZE 100000
+#define SEND_SIZE 1000
 
 Server::Server( std::map<int, Config*> configs)
 {

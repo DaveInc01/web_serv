@@ -1,18 +1,15 @@
 #include "Directives.hpp"
 
-Directives::Directives(): _autoindex("on"),_root("www")
+Directives::Directives(): _autoindex("off"),_root("www")
  {
-    // _methods = {"GET", "POST", "DELETE"};
-    // _index = {"index.html"};
+    
     _methods.push_back("GET");
     _methods.push_back("POST");
     _methods.push_back("DELETE");
 
-    _index.push_back("index.html");
  }
 
 Directives::~Directives() {}
-
 
 void Directives::add_directives(std::pair<std::string,  std::vector<std::string> > &p)
 {
@@ -20,14 +17,37 @@ void Directives::add_directives(std::pair<std::string,  std::vector<std::string>
         _autoindex = (p.second)[0];
     else if(p.first == "index")
     {
-        _index.clear();
-        for(unsigned long i = 0; i < p.second.size(); i++)
+        // _index.clear();
+        for(int i = 0; i < (int)(int)p.second.size(); i++) {
             _index.push_back(p.second[i]);
+        }
     }
-    else if (p.first == "root")
+    else if (p.first == "root") {
         _root = p.second[0];
-    else if (p.first == "upload_path")
-        _upload_path = p.second[0];  
+        size_t pos = _root.find("./", 0, 2);
+        if (pos != std::string::npos)
+            _root = _root.substr(pos + 2);
+        else if (_root[0] == '/')
+            _root = _root.substr(1);
+
+        if (_root.length() < 3 || _root.compare(0, 3, "www") != 0)
+            throw std::invalid_argument("Invalid syntax: 'root' should start www");
+        else if (_root.length() > 3 && _root.compare(0, 4, "www/") != 0)
+            throw std::invalid_argument("Invalid syntax: 'root' should start with www/");
+    }
+    else if (p.first == "upload_path") {
+        _upload_path = p.second[0];
+        size_t pos = _upload_path.find("./", 0, 2);
+        if (pos != std::string::npos)
+            _upload_path = _upload_path.substr(pos + 2);
+        else if (_upload_path[0] == '/')
+            _upload_path = _upload_path.substr(1);
+            
+        if (_upload_path.length() < 3 || _upload_path.compare(0, 3, "www") != 0)
+            throw std::invalid_argument("Invalid syntax: '_upload_path' should start www");
+        else if (_upload_path.length() > 3 && _upload_path.compare(0, 4, "www/") != 0)
+            throw std::invalid_argument("Invalid syntax: '_upload_path' should start with www/");
+    }
     else if(p.first == "client_max_body_size")
         _client_max_body_size = (p.second)[0];
     else if (p.first == "cgi")
@@ -42,7 +62,7 @@ void Directives::add_directives(std::pair<std::string,  std::vector<std::string>
     else if(p.first == "methods")
     {
         _methods.clear();
-        for(unsigned long i = 0; i < p.second.size(); i++)
+        for(int i = 0; i < (int)p.second.size(); i++)
             _methods.push_back(p.second[i]);
     }
     else if(p.first == "error_page")
@@ -54,6 +74,7 @@ void Directives::add_directives(std::pair<std::string,  std::vector<std::string>
     }
     // directives.push_back(p);
 }
+
 
 
 
@@ -109,22 +130,22 @@ void Directives::printDirective() const {
    
     std::cout << "_autoIndex: " << _autoindex << std::endl;
     std::cout << "_index: ";
-    for (unsigned long j = 0; j < _index.size(); j++) {
+    for (int j = 0; j < (int)_index.size(); j++) {
         std::cout << _index[j] << " "; 
     }
     std::cout << "\n_root: " << _root << std::endl;
     std::cout << "_upload_path: " << _upload_path << std::endl;
     std::cout << "_client_max_body_size: " << _client_max_body_size << std::endl;
-    for (unsigned long j = 0; j < _error_page.size(); j++)
+    for (int j = 0; j < (int)_error_page.size(); j++)
     {
         std::cout << "_error_page: (" << _error_page[j].first << ", " << _error_page[j].second << ")" << std::endl;
     }
     std::cout << "_methods: ";
-    for (unsigned long j = 0; j < _methods.size(); j++)
+    for (int j = 0; j < (int)_methods.size(); j++)
         std::cout << this->_methods[j] << " ";
 
     std::cout << std::endl;
-    for (unsigned long j = 0; j < _cgi.size(); j++)
+    for (int j = 0; j < (int)_cgi.size(); j++)
     {
         std::cout << "_cgi: (" << _cgi[j].first << ", " << _cgi[j].second << ")" << std::endl;
     }

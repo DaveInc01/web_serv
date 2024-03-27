@@ -9,6 +9,7 @@ public:
     int _servsCount;
     std::map<int, Config *> _AllServs;
     std::vector<std::string> _directiv_list;
+    std::string _st;
 
 public:
     AllConfigs();
@@ -30,7 +31,8 @@ public:
     void    check_parentheses(std::string const &full) const;
     void    cut_location(std::string &s, Config *S);
     
+    void clearSpaces(std::string line);
+    static bool isSpace(char a, char b);
 };
-
 
 #endif

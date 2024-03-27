@@ -96,7 +96,8 @@ std::string MimeTypes::getContentType(const std::string &path)
 			return mime_types[ext];
 		}
     }
-	return "application/octet-stream";
+	//return "application/octet-stream";
+	return "text/plain";
 }
 
 std::string MimeTypes::getContentTypeLine(const std::string &path)

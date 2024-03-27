@@ -54,10 +54,9 @@ int ResponseParser::checkIsAloowedMethod(){
 		throw(405);
 	return 0;
 }	
-
 int ResponseParser::generateGetResponse()
 {
-	std::cout << "mmm--- serve_root = " << serve_root << std::endl;
+	std::cout << "serve root = " << serve_root << std::endl;
 	Directives *loc = corresponding_location;
 	MimeTypes mime_types;
 	if (serve_root.find("favicon.ico") != std::string::npos)
@@ -90,9 +89,24 @@ int ResponseParser::generateGetResponse()
 		{
 			if (!ext.empty() && ext == it->first)
 			{
+				if (!is_file_exists(it->second))
+				{
+					throw (500);
+				}
+
 				int fd = Cgi::execute(*this, it->second);
-				this->_response = "HTTP/1.1 204 OK\n";
-				//TODO get content from fd
+				// checkCgi();
+				std::string cgi_content;
+
+				int		sz;
+				char	buf[1024];
+
+				while ((sz = read(fd, buf, 1023)) != 0)
+				{
+					buf[sz] = '\0';
+					cgi_content += std::string(buf);
+				}
+				this->_response = generateResponseStringForString(200, cgi_content);
 				close(fd);
 				return 0;
 			}
@@ -101,7 +115,11 @@ int ResponseParser::generateGetResponse()
 
 	if (is_file_exists(serve_root))
 	{
-		if(is_regular_file(serve_root))
+		struct stat tmp_info;
+		std::string concat_paths = serve_root;
+		stat(concat_paths.c_str(), &tmp_info);
+		int sz = tmp_info.st_size;
+		if(is_regular_file(serve_root) || sz == 0)
 		{
 			this->_response = generateResponseStringForPath(200, serve_root);
 		}
@@ -109,6 +127,7 @@ int ResponseParser::generateGetResponse()
 		{
 			if(loc->_index.empty())
 			{
+				
 				if (loc->_autoindex == "on")
 				{
 					this->_response = generateResponseStringForString(200, getDirContentHTML(serve_root));
@@ -122,18 +141,19 @@ int ResponseParser::generateGetResponse()
 			{
 				bool is_404 = true;
 				for (unsigned long i = 0; i < loc->_index.size(); ++i)
-				{
-					std::string concat_paths = concatStrings(serve_root, loc->_index[i]);
-					if(is_file_exists(concat_paths) && is_regular_file(concat_paths))
+				{				
+
+					concat_paths = concatStrings(serve_root, loc->_index[i]);
+					if(is_file_exists(concat_paths) && (is_regular_file(concat_paths) || sz == 0))
 					{
 						this->_response = generateResponseStringForPath(200, concat_paths);
 						is_404 = false;
 						break;
 					}
-				}
-				if (is_404)
-				{
-					throw(404);
+					if (is_404)
+					{
+						throw(404);
+					}
 				}
 			}
 		}
@@ -193,9 +213,11 @@ void ResponseParser::postWithoutCgi()
 	}
 	filename += file_type;
 	std::string upl_path = this->corresponding_location->getUpload_path();
-	if((upl_path.size()) && (upl_path[upl_path[upl_path.length()]] != '/'))
+	if((upl_path.size()) && (upl_path[upl_path[upl_path.length() - 1]] != '/'))
 		upl_path += '/';
 	std::ofstream out(upl_path + filename);
+	if(!(out.is_open()))
+		throw(400);
 	out << this->request.getPostReqBody();
 	out.close();
 }
@@ -203,8 +225,10 @@ void ResponseParser::postWithoutCgi()
 int ResponseParser::generatePostResponse()
 {
 	checkMaxBodySize();
+	checkUploadPath();
 	if(this->request.getIsMultipart())
 	{
+		this->serve_root = "src/cgi/upload.py";
 		int fd = Cgi::execute(*this, "");
 		close(fd);
 	}
@@ -297,3 +321,69 @@ std::string ResponseParser::generateResponseStringForString(const int status_cod
 	resp += content;
 	return resp;
 }
+
+int ResponseParser::checkUploadPath()
+{
+	struct stat s;
+	std::string upload_path = this->corresponding_location->getUpload_path();
+	std::cout << "upload_path " << upload_path << std::endl;
+	if( stat(upload_path.c_str(), &s) == 0 )
+	{
+		if( s.st_mode & S_IFDIR )
+		{
+			std::cout << "Upload path was found\n";
+			return 0;
+		}
+		else{
+			throw(400);
+		}
+		// else if( s.st_mode & S_IFREG )
+		// {
+		// 	// it's a file
+		// }
+		// else
+		// {
+		// 	// something else
+		// }
+	}
+	throw(400);
+}
+
+bool ResponseParser::checkCgi() {
+    if (cgiPID != -1) {
+        // std::cout << ":checkCgi\n";
+        int status;
+        int waitRet;
+        waitRet = waitpid(cgiPID, &status, WNOHANG);
+        if (waitRet == -1) {
+            throw (500);
+        }
+        if (waitRet == 0 && time(NULL) - cgiStartTime > CGI_TIMEOUT) {
+            if (kill(cgiPID, SIGKILL) == -1) {
+                throw std::runtime_error(std::string("kill: ") + strerror(errno));
+            };
+            waitpid(cgiPID, &status, 0);
+            cgiPID = -1;
+            if (WTERMSIG(status) == SIGKILL) {
+                throw (508);
+            }
+            throw (500);
+        }
+        if (waitRet != 0 && WIFEXITED(status)) {
+            cgiPID = -1;
+            // std::ofstream osf("cgi_output.log");
+            // char buf[2000];
+            // buf[read(_cgiPipeFd, buf, 1999)] = '\0';
+            // osf << buf;
+            if (WEXITSTATUS(status) != 0) {
+                // osf << this->getRequestBody();
+                std::cout << "WEXITSTATUS(status) = " << WEXITSTATUS(status) << std::endl;
+                throw (500);
+            }
+            std::cout << "WEXITSTATUS(status) = " << WEXITSTATUS(status) << std::endl;
+            // EvManager::addEvent(_cgiPipeFd, EvManager::read, EvManager::inner);
+            // this->addInnerFd(new InnerFd(_cgiPipeFd, *this, this->getResponseBody(), EvManager::read));
+        }
+    }
+    return (true);
+};

@@ -44,7 +44,6 @@ public:
     std::string const &  getReturn() const;
     
     void printDirective() const;
-
 };
 
 

@@ -14,7 +14,6 @@ int Cgi::execute(ResponseParser &client, const std::string &cgi_path) {
     // const std::string &argv1 = client.getCurrentLoc().getCgi(client.getExtension()).second;
     // const std::string &argv1 = PYTHON_CGI_PATH;
 	const std::string &argv1 = cgi_path.empty() ? PYTHON_CGI_PATH : cgi_path;
-	std::cout << "cgi path" << argv1 << std::endl;
     argv[0] = const_cast<char *>(argv1.c_str());
     const std::string &argv2 =  client.getServerRoot();
     argv[1] = const_cast<char *>(argv2.c_str());
@@ -35,6 +34,7 @@ int Cgi::execute(ResponseParser &client, const std::string &cgi_path) {
     osf << client.request.getPostReqBody();
     osf.flush();
     osf.close();
+
     if (pid == 0) {
         if (client.request.getMethod() == "POST") {
             int fd = open(tmp_file_name.c_str(), O_RDWR);
@@ -48,14 +48,15 @@ int Cgi::execute(ResponseParser &client, const std::string &cgi_path) {
         dup2(pipe_from_child[1], 1);
         close(pipe_from_child[0]);
         close(pipe_from_child[1]);
-        execve(argv[0], argv, envp);
-        perror("execve: ");
+        if(execve(argv[0], argv, envp) == -1)
+        {
+            throw(501);
+        }
         // exit(res);
         exit(1);
     }
-    waitpid(pid, NULL, 0);
     close(pipe_from_child[1]);
-    // client.setCgiPID(pid);
+    // client.setCgiPId(pid);
     // client.setCgiStartTime();
     return (pipe_from_child[0]);
 };
@@ -75,7 +76,7 @@ char **Cgi::initEnv(ResponseParser &client)
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
     _env["PATH_INFO"] = client.getServerRoot();
     _env["PATH_TRANSLATED"] = pwd + std::string("/") + client.getServerRoot();
-    _env["QUERY_STRING"] = client.request.getQueryString(); 
+    _env["QUERY_STRING"] = client.request.getQueryString();
     _env["REMOTE_ADDR"] = client.request.getClientIp();
     _env["REMOTE_HOST"] = client.request.getHost();
     _env["REMOTE_USER"] = pwd;
@@ -87,7 +88,7 @@ char **Cgi::initEnv(ResponseParser &client)
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
     _env["SERVER_SOFTWARE"] = "Web_serv";
 	std::string upl_path = client.corresponding_location->getUpload_path();
-	if((upl_path.size()) && (upl_path[upl_path[upl_path.length()]] != '/'))
+	if((upl_path.size()) && (upl_path[upl_path[upl_path.length() - 1]] != '/'))
 		upl_path += '/';
     _env["SERVER_WRITE_PATH"] = upl_path;
     _env["UPLOAD_DIR"] = client.corresponding_location->getUpload_path();
@@ -98,11 +99,11 @@ char **Cgi::initEnv(ResponseParser &client)
     char **envp = new char *[_env.size() + 1];
 
 	int i = 0;
-    std::ofstream ofs("env.log");
+    // std::ofstream ofs("env.log");
 	for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); ++it)
 	{
 		envp[i++] = strdup((it->first + "=" + it->second).c_str());
-        ofs << envp[i - 1] << std::endl;;
+        // ofs << envp[i - 1] << std::endl;
 	}
 	envp[i] = NULL;
 	return envp;

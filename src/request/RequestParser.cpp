@@ -87,14 +87,14 @@ int   RequestParser::parseRoute()
    if (start != std::string::npos && end != std::string::npos)
    {
       try{
-		this->route = line.substr(start, (end - start));
-		if (this->route.size() > 1)
-		{
-			if(this->route[this->route.size() - 1] == '/')
-			{
-				this->route = this->route.erase(this->route.size()-1);
-			}
-		}
+         this->route = line.substr(start, (end - start));
+         if (this->route.size() > 1)
+         {
+            if(this->route[this->route.size() - 1] == '/')
+            {
+               this->route = this->route.erase(this->route.size()-1);
+            }
+         }
       }
       catch(std::exception &e)
       {
@@ -250,6 +250,8 @@ int   RequestParser::findReqEnd()
       if(this->method != "POST")
          this->is_req_end = 1;  
       else{
+         // if(http_req.size() == (http_req.find("\r\n\r\n") + 4))
+         //    this->is_req_end = 1;
          if(this->transfer_encoding != "chunked")
          {
             if(this->content_length_int > 0)
@@ -260,7 +262,6 @@ int   RequestParser::findReqEnd()
          }
          else if(this->transfer_encoding == "chunked"){
             /* for chunked request */
-
             if(this->http_req.find("0\r\n\r\n", http_req.size() - 5) != std::string::npos)
             {
                this->is_req_end = 1;

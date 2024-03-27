@@ -161,6 +161,15 @@ int IResponseParser::setServeRoot(){
     return 0;
 }
 
+void IResponseParser::setCgiPId(int pid)
+{
+    this->cgiPID = pid;
+}
+
+void IResponseParser::setCgiStartTime() {
+    this->cgiStartTime = time(NULL);
+};
+
 std::string IResponseParser::getServerRoot()
 {
     return this->serve_root;

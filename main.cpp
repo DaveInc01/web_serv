@@ -8,13 +8,13 @@ int main(){
     }
     catch(const std::exception& e)
     {
-        // std::cout << "hhhhh" << std::endl;
         std::cerr << e.what() << std::endl;;
-        // return (0);
+        return (0);
     }
     catch(...)
     {
-        std::cout << "hhhhh" << std::endl;
+        std::cout << "Invalid config file" << std::endl;
+        return (0);
     }
     try{
         Server server1(configs._AllServs);

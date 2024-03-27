@@ -7,6 +7,7 @@
 #include <vector>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <signal.h>
 #include "config/AllConfigs.hpp"
 
 

@@ -15,6 +15,8 @@ public:
     int             findInVect(std::string, Config*);
     int             setServeRoot();
 	int				cutResponse(int);
+    void            setCgiPId(int);
+    void            setCgiStartTime();
 public:
     /* Location which should be using for serveing data */
     Directives      *corresponding_location;
@@ -37,6 +39,8 @@ protected:
     int             http_version;
     int             have_def_location;
 	unsigned long int   max_body_size_bytes;
+    int            cgiPID;
+    std::time_t    cgiStartTime;
 };
 
 int findPosition(const std::vector<int>& vec);
