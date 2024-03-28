@@ -121,6 +121,8 @@ void Config::sum_func()
 
         std::string str = _listen.substr(pos + 1);
         _port = atoi(str.c_str());
+        if (_port < 1024 || _port > 49151)
+            throw std::invalid_argument("failed port");
     }
     else {
         if (_listen.find(".") != std::string::npos) {
@@ -133,7 +135,11 @@ void Config::sum_func()
                 _host = "127.0.0.1";
                 
             if (atoi(_listen.c_str()) != 0)
+            {
                 _port = atoi(_listen.c_str());
+                if (_port < 1024 || _port > 49151)
+                    throw std::invalid_argument("failed port");
+            }
         }
     }
 }

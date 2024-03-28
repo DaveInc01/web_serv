@@ -1,6 +1,6 @@
 #include "Directives.hpp"
 
-Directives::Directives(): _autoindex("off"),_root("www")
+Directives::Directives(): _autoindex("off"),_root("www"),_upload_path("www")
  {
     
     _methods.push_back("GET");

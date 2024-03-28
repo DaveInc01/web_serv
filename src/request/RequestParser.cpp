@@ -46,7 +46,7 @@ int   RequestParser::setProperties(){
    if (this->method == "POST")
    {
       setValue("Content-Type", this->content_type);
-	  setValue("Content-Disposition", this->content_disposition);
+	   setValue("Content-Disposition", this->content_disposition);
       if(this->content_type.find("multipart/form-data") != std::string::npos)
       {
          is_multipart = true;
@@ -86,19 +86,13 @@ int   RequestParser::parseRoute()
    unsigned long end = line.find(' ', start);
    if (start != std::string::npos && end != std::string::npos)
    {
-      try{
-         this->route = line.substr(start, (end - start));
-         if (this->route.size() > 1)
-         {
-            if(this->route[this->route.size() - 1] == '/')
-            {
-               this->route = this->route.erase(this->route.size()-1);
-            }
-         }
-      }
-      catch(std::exception &e)
+      this->route = line.substr(start, (end - start));
+      if (this->route.size() > 1)
       {
-         std::cout << e.what() << std::endl; 
+         if(this->route[this->route.size() - 1] == '/')
+         {
+            this->route = this->route.erase(this->route.size()-1);
+         }
       }
       parseHttpVersion(line);
    }
@@ -148,9 +142,6 @@ void RequestParser::parseMultipartFormData(const std::string& body, const std::s
       {
          this->post_req_body = body.substr(body_start, end - body_start);
       }
-      // std::string newstr = body.substr(body_start, 15);
-      // std::cout << "body_start " << body_start << std::endl;
-      // std::cout << "15 - " << newstr << std::endl;
    }
 }
 
@@ -184,7 +175,6 @@ int   RequestParser::launchParse( std::string buff, int len )
                std::pair<std::string, std::string> p_line = ft_split(line, ':');
                request.insert(request.end(), p_line);
             }
-            // std::cout << "line - " << line;
          }
          else{
             this->unfinished_line = line;
@@ -201,7 +191,6 @@ int   RequestParser::launchParse( std::string buff, int len )
 std::string RequestParser::getLine(int &index)
 {
    std::string line = "";
-      // std::cout << buff << std::endl;
    while (index < buff_len)
    {
       if(!header_finish)
@@ -237,7 +226,6 @@ std::string RequestParser::getLine(int &index)
          else
             this->header_line_finish = -1;
       }
-      // std::cout << "line - " <<  line << std::endl;
    }
    return (line);
 }
@@ -252,7 +240,9 @@ int   RequestParser::findReqEnd()
       else{
          // if(http_req.size() == (http_req.find("\r\n\r\n") + 4))
          //    this->is_req_end = 1;
-         if(this->transfer_encoding != "chunked")
+         if(content_length_int == 0)
+            this->is_req_end = 1;
+         else if(this->transfer_encoding != "chunked")
          {
             if(this->content_length_int > 0)
             {

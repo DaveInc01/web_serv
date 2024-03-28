@@ -25,8 +25,6 @@ int Server::upServer(int serv_socket, int port)
     setsockopt(serv_socket, SOL_SOCKET, SO_REUSEADDR, &l, sizeof(l));
     if (fcntl(serv_socket, F_SETFL, O_NONBLOCK, FD_CLOEXEC) < 0)
     {
-        // std::cout << "Fcntl error\n";
-        // server_sockets.erase(server_sockets.begin() + i);
         throw("Fcntl error");
     }
     int nRet = bind(serv_socket, (sockaddr*)&srv, sizeof(sockaddr));
@@ -34,9 +32,6 @@ int Server::upServer(int serv_socket, int port)
     {
         std::cout << "Fail to bind to loacal port\n";
         exit(EXIT_FAILURE);
-    }
-    else{
-        std::cout << "The socket bined successfully\n\n\n";
     }
 
     nRet = listen(serv_socket, MAX_CLIENTS);
@@ -84,25 +79,13 @@ void Server::httpIO()
     do {
         activity = select(max_sd + 1, &tmpReadfds, &tmpWritefds, NULL, NULL);
     } while (activity == -1);
-    if((activity < 0) && (errno != EINTR))
-    {
-        std::cout << "activity - " << activity << std::endl;
-        perror("Select error");
-    }
     for(int i = 0; i < servers_count; i++)
     {
         if (FD_ISSET(server_sockets.at(i), &tmpReadfds) != 0)
         {
             /* new conection has come */ 
             if ((newSocket = accept(server_sockets.at(i), (struct sockaddr*)&srv, (socklen_t*)&addrlen)) < 0) {
-                std::cout << "Socket is returning - " << newSocket <<std::endl;
-                perror("Accept failed");
-                exit(EXIT_FAILURE);
-            }
-            else{
-                std::cout << "Accept the fd number - " << newSocket << std::endl;
-                // char *addr = inet_ntoa(srv.sin_addr);
-                // std::cout << "Client address - " << addr << std::endl; 
+                continue;
             }
         }
     }
@@ -115,7 +98,6 @@ void Server::httpIO()
                 FD_SET(newSocket, &readfds);
                 fcntl(newSocket, F_SETFL, O_NONBLOCK);
                 client_sockets.at(i) = newSocket;
-                std::cout << newSocket << std::endl;
                 std::pair<int, RequestParser> clients_req_elem;
                 clients_req_elem.first = newSocket;
                 clients_req_elem.second = RequestParser();
@@ -139,8 +121,6 @@ void Server::httpIO()
         {
             valread = recv(sd, buff, sizeof(buff) - 1, 0);
             buff[valread] = '\0';
-            // std::cout << "Buff length - " << sizeof() << std::endl;
-
             if (valread > 0)
             {
                 std::string strBuff(buff, valread);
@@ -160,30 +140,40 @@ void Server::httpIO()
                 // FD_ZERO(&tmpWritefds);
                 continue;
             }
-            else if(valread == 0){
-                // Errors *e = new Errors(400);
-                // int send_res = send(sd, e->getErrorResponse().c_str(), e->getErrorResponse().length(), 0);
-                // delete e;
-                // FD_CLR(sd, &readfds);
-                // FD_CLR(sd, &tmpReadfds);
-                // break ;
-                /* 400 code */
+            if (valread == -1 || valread == 0) {
+                FD_CLR(sd, &readfds);
+                clientsReq.erase(sd); 
+                continue;
             }
         }
+        
         else if(FD_ISSET(sd, &tmpWritefds))
         {
+            int res;
 			if(clientsResp.at(sd)._response.length() > SEND_SIZE)
 			{
 				/* Response is bigger than SEND_SIZE */
-            	send(sd, clientsResp.at(sd)._response.c_str(), SEND_SIZE,0);
+            	res = send(sd, clientsResp.at(sd)._response.c_str(), SEND_SIZE,0);
+                if (res == -1 || res == 0) {
+                    FD_CLR(sd, &writefds);
+                    clientsReq.erase(sd); 
+                    clientsResp.erase(sd); 
+                    continue;
+                }
 				clientsResp.at(sd)._response = clientsResp.at(sd)._response.substr(SEND_SIZE, (clientsResp.at(sd)._response.length() - SEND_SIZE));
 				// FD_ZERO(&tmpWritefds);
 				break ;
 			}
 			else{
-            	send(sd, clientsResp.at(sd)._response.c_str(), clientsResp.at(sd)._response.size(), 0);
+            	res = send(sd, clientsResp.at(sd)._response.c_str(), clientsResp.at(sd)._response.size(), 0);
+                if (res == -1 || res == 0) {
+                    FD_CLR(sd, &writefds);
+                    clientsReq.erase(sd); 
+                    clientsResp.erase(sd); 
+                    continue;
+                }
 				getpeername(sd, (struct sockaddr*)&srv, (socklen_t*)&addrlen);
-				std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl << std::endl;
+				std::cout << "Host disconnected, ip " << inet_ntoa(srv.sin_addr) << " , port " << ntohs(srv.sin_port) << std::endl;
 				
 				clientsReq.erase(sd); 
 				clientsResp.erase(sd);

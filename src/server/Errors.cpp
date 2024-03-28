@@ -15,7 +15,7 @@ Errors::Errors(int status, ResponseParser& response)
 
 std::string Errors::getPathFromConf(int status, ResponseParser& response){
     std::vector<std::pair<std::string, std::string> > conf_error = response.corresponding_location->getError_page();
-    std::string status_str = std::to_string(status);
+    std::string status_str = intToString<int>(status);
     for (std::vector<std::pair<std::string, std::string> >::iterator it = conf_error.begin(); it != conf_error.end(); ++it)
     {
         if(status_str == it->first)
@@ -112,7 +112,7 @@ int Errors::setDefaultErrorResponse(int status)
 	std::string default_path = "src/default_files/not_found.html";
     int is_default_error = 1;
     error_response = "HTTP/1.1 ";
-    error_response += std::to_string(status);
+    error_response += intToString<int>(status);
     error_response += " ";
     error_response += _status_codes.at(status);
     if(this->error_file_path.size())
@@ -127,13 +127,13 @@ int Errors::setDefaultErrorResponse(int status)
 	std::string content( (std::istreambuf_iterator<char>(ifs) ),
 				(std::istreambuf_iterator<char>()    ) );
     error_response += "\nContent-Type:text/html\nContent-Length: ";
-    error_response +=  std::to_string(content.length());
+    error_response +=  intToString<size_t>(content.length());
     error_response += "\n\n";
 		/* Change Error 404 from html to correct status */
     if(is_default_error){
         size_t found = content.find("Error 404");
         std::string status_str = "Error ";
-        status_str += std::to_string(status);
+        status_str += intToString<int>(status);
         content.replace(found, status_str.length(), status_str);
     }
     error_response += content;
@@ -161,6 +161,6 @@ std::string Errors::getStatusText(int status_code)
 std::string Errors::getStatusLine(int status_code)
 {
 	std::string res("HTTP/1.1 ");
-	res += std::to_string(status_code) + " " + getStatusText(status_code) + "\n";
+	res += intToString<int>(status_code) + " " + getStatusText(status_code) + "\n";
 	return res;
 }

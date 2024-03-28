@@ -36,36 +36,40 @@ int Cgi::execute(ResponseParser &client, const std::string &cgi_path) {
     osf.close();
 
     if (pid == 0) {
+        alarm(2);
         if (client.request.getMethod() == "POST") {
             int fd = open(tmp_file_name.c_str(), O_RDWR);
-            std::cout << "fd = " << fd << std::endl;
             dup2(fd, 0);
             close(fd);
-			std::remove(tmp_file_name.c_str());
         }
         char **envp = Cgi::initEnv(client);
-
         dup2(pipe_from_child[1], 1);
         close(pipe_from_child[0]);
         close(pipe_from_child[1]);
         if(execve(argv[0], argv, envp) == -1)
         {
+            for(unsigned int i = 0; envp[i]!=NULL; i++){
+                delete envp[i];
+            }
+            delete envp;
             throw(501);
         }
-        // exit(res);
         exit(1);
     }
+    int status;
+    waitpid(pid, &status, 0); // Wait for the child to finish
+    if (WIFEXITED(status)) {
+        std::remove(tmp_file_name.c_str());
+        throw(501);
+    }
+    std::remove(tmp_file_name.c_str());
     close(pipe_from_child[1]);
-    // client.setCgiPId(pid);
-    // client.setCgiStartTime();
     return (pipe_from_child[0]);
 };
 
 char **Cgi::initEnv(ResponseParser &client)
 {
     char *pwd;
-    // const ServerCore &srv = client.getCurrentLoc();
-    // client.showHeaders();
     pwd = getcwd(NULL, 0);
     _env["AUTH_TYPE"] = "Basic";
     std::string length = client.request.getContentLength();
@@ -96,14 +100,15 @@ char **Cgi::initEnv(ResponseParser &client)
     _env["REDIRECT_STATUS"] = "true";
 	free(pwd);
 
-    char **envp = new char *[_env.size() + 1];
+    char **envp = new char* [_env.size() + 1];
 
 	int i = 0;
-    // std::ofstream ofs("env.log");
 	for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); ++it)
 	{
-		envp[i++] = strdup((it->first + "=" + it->second).c_str());
-        // ofs << envp[i - 1] << std::endl;
+        std::string elem = it->first + "=" + it->second;
+        char *cstr = new char[elem.size() + 1];
+        std::strcpy(cstr, elem.c_str());
+		envp[i++] = cstr;
 	}
 	envp[i] = NULL;
 	return envp;

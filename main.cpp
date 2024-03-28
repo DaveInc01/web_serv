@@ -1,10 +1,16 @@
 #include "server/Server.hpp"
 
-int main(){
+int main(int ac, char **av){
+    if (ac > 2)
+    {
+        std::cout << "invalid: many parametr av" << std::endl;
+        return (0);
+    }    
     AllConfigs configs;
     try{
+        if(ac == 2)
+            configs._st = av[1];
         configs.readConff();
-        
     }
     catch(const std::exception& e)
     {
@@ -13,7 +19,7 @@ int main(){
     }
     catch(...)
     {
-        std::cout << "Invalid config file" << std::endl;
+        std::cout << "Some Error has ocured" << std::endl;
         return (0);
     }
     try{
@@ -24,9 +30,9 @@ int main(){
     {
         std::cout << e << std::endl;
     }
-     catch(...)
+    catch(...)
     {
-        std::cout << "Some error" << std::endl;
+        std::cout << "Some Error has ocured" << std::endl;
     }
     return 0;
 }

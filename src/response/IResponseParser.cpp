@@ -7,7 +7,6 @@ int IResponseParser::setCorrespondingLocation()
     checkDefaultLocation(corresponding_server);
     this->corresponding_location = getCorrespondingLocation(corresponding_server);
     this->setServeRoot();
-	std::cout << "SERVE_ROOT << " << this->serve_root << std::endl;
     return 0;
 }
 

@@ -13,6 +13,8 @@ ResponseParser::ResponseParser(RequestParser req, std::map<int, Config *> config
     this->configs_map = configs_map;
     this->setCorrespondingLocation();
 	this->launchResponse();
+	std::cout << "serve_root " << this->serve_root << "\ncorres loc - " << this->corresponding_location->getIndex()[0] << std::endl; 
+	
 }
 
 void ResponseParser::setResponse(std::string r){
@@ -54,9 +56,9 @@ int ResponseParser::checkIsAloowedMethod(){
 		throw(405);
 	return 0;
 }	
+
 int ResponseParser::generateGetResponse()
 {
-	std::cout << "serve root = " << serve_root << std::endl;
 	Directives *loc = corresponding_location;
 	MimeTypes mime_types;
 	if (serve_root.find("favicon.ico") != std::string::npos)
@@ -93,7 +95,8 @@ int ResponseParser::generateGetResponse()
 				{
 					throw (500);
 				}
-
+				if(!is_file_exists(serve_root))
+					throw(404);
 				int fd = Cgi::execute(*this, it->second);
 				// checkCgi();
 				std::string cgi_content;
@@ -113,6 +116,7 @@ int ResponseParser::generateGetResponse()
 		}
 	}
 
+	std::string default_html = "<html><body><h1 style=\"color:blue;text-align:center\">Welcome to \"Webserv\" 42 project</body></html></h1>";
 	if (is_file_exists(serve_root))
 	{
 		struct stat tmp_info;
@@ -122,6 +126,7 @@ int ResponseParser::generateGetResponse()
 		if(is_regular_file(serve_root) || sz == 0)
 		{
 			this->_response = generateResponseStringForPath(200, serve_root);
+			return 0;
 		}
 		else
 		{
@@ -131,10 +136,19 @@ int ResponseParser::generateGetResponse()
 				if (loc->_autoindex == "on")
 				{
 					this->_response = generateResponseStringForString(200, getDirContentHTML(serve_root));
+					return 0;
 				}
 				else
 				{
-					throw(404);
+					if (request.getRoute() == "/")
+					{
+						this->_response = generateResponseStringForString(200, default_html);
+						return 0;
+					}
+					else
+					{
+						throw(404);
+					}
 				}
 			}
 			else
@@ -152,7 +166,15 @@ int ResponseParser::generateGetResponse()
 					}
 					if (is_404)
 					{
-						throw(404);
+						if (request.getRoute() == "/")
+						{
+							this->_response = generateResponseStringForString(200, default_html);
+							return 0;
+						}
+						else
+						{
+							throw(404);
+						}
 					}
 				}
 			}
@@ -160,7 +182,15 @@ int ResponseParser::generateGetResponse()
 	}
 	else
 	{
-		throw(404);
+		if (request.getRoute() == "/")
+		{
+			this->_response = generateResponseStringForString(200, default_html);
+			return 0;
+		}
+		else
+		{
+			throw(404);
+		}
 	}
     return 0;
 }
@@ -277,19 +307,6 @@ int ResponseParser::launchResponse()
 		delete e;
 		return 0;
 	}
-	// std::string arr="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 16\n\n<h1>testing</h1>";
-	// std::string my_response = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: ";
-	// struct stat filestatus;
-	// stat("www/index.html", &filestatus );
-	// std::cout << "HOST -" << this->request.getHost() << std::endl;
-	// // std::cout << "URL --- " <<  this->request.getRoute() << std::endl;
-	// my_response += std::to_string(filestatus.st_size) + "\n\n";
-	// std::ifstream ifs("www/index.html");
-	// std::string content( (std::istreambuf_iterator<char>(ifs) ),
-	// 			(std::istreambuf_iterator<char>()    ) );
-	// my_response	+= content;
-	// this->_response = my_response;
-	// ifs.close();
     return 0;
 };
 
@@ -298,7 +315,7 @@ std::string ResponseParser::getContentLengthLine(const std::string &path)
 	std::string res("Content-Length: ");
 	struct stat filestatus;
 	stat(path.c_str(), &filestatus );
-	res+= std::to_string(filestatus.st_size) + "\n";
+	res += intToString<unsigned long long>(((unsigned long long)filestatus.st_size)) + "\n";
 	return res;
 }
 
@@ -317,7 +334,7 @@ std::string ResponseParser::generateResponseStringForPath(const int status_code,
 std::string ResponseParser::generateResponseStringForString(const int status_code, const std::string &content)
 {
 	Errors err;
-	std::string resp = err.getStatusLine(status_code) + "Content-Type:text/html\nContent-Length: " + std::to_string(content.length()) + "\n\n";
+	std::string resp = err.getStatusLine(status_code) + "Content-Type:text/html\nContent-Length: " + intToString<size_t>(content.length()) + "\n\n";
 	resp += content;
 	return resp;
 }
@@ -337,53 +354,45 @@ int ResponseParser::checkUploadPath()
 		else{
 			throw(400);
 		}
-		// else if( s.st_mode & S_IFREG )
-		// {
-		// 	// it's a file
-		// }
-		// else
-		// {
-		// 	// something else
-		// }
 	}
 	throw(400);
 }
 
-bool ResponseParser::checkCgi() {
-    if (cgiPID != -1) {
-        // std::cout << ":checkCgi\n";
-        int status;
-        int waitRet;
-        waitRet = waitpid(cgiPID, &status, WNOHANG);
-        if (waitRet == -1) {
-            throw (500);
-        }
-        if (waitRet == 0 && time(NULL) - cgiStartTime > CGI_TIMEOUT) {
-            if (kill(cgiPID, SIGKILL) == -1) {
-                throw std::runtime_error(std::string("kill: ") + strerror(errno));
-            };
-            waitpid(cgiPID, &status, 0);
-            cgiPID = -1;
-            if (WTERMSIG(status) == SIGKILL) {
-                throw (508);
-            }
-            throw (500);
-        }
-        if (waitRet != 0 && WIFEXITED(status)) {
-            cgiPID = -1;
-            // std::ofstream osf("cgi_output.log");
-            // char buf[2000];
-            // buf[read(_cgiPipeFd, buf, 1999)] = '\0';
-            // osf << buf;
-            if (WEXITSTATUS(status) != 0) {
-                // osf << this->getRequestBody();
-                std::cout << "WEXITSTATUS(status) = " << WEXITSTATUS(status) << std::endl;
-                throw (500);
-            }
-            std::cout << "WEXITSTATUS(status) = " << WEXITSTATUS(status) << std::endl;
-            // EvManager::addEvent(_cgiPipeFd, EvManager::read, EvManager::inner);
-            // this->addInnerFd(new InnerFd(_cgiPipeFd, *this, this->getResponseBody(), EvManager::read));
-        }
-    }
-    return (true);
-};
+// bool ResponseParser::checkCgi() {
+//     if (cgiPID != -1) {
+//         // std::cout << ":checkCgi\n";
+//         int status;
+//         int waitRet;
+//         waitRet = waitpid(cgiPID, &status, WNOHANG);
+//         if (waitRet == -1) {
+//             throw (500);
+//         }
+//         if (waitRet == 0 && time(NULL) - cgiStartTime > CGI_TIMEOUT) {
+//             if (kill(cgiPID, SIGKILL) == -1) {
+//                 throw std::runtime_error(std::string("kill: ") + strerror(errno));
+//             };
+//             waitpid(cgiPID, &status, 0);
+//             cgiPID = -1;
+//             if (WTERMSIG(status) == SIGKILL) {
+//                 throw (508);
+//             }
+//             throw (500);
+//         }
+//         if (waitRet != 0 && WIFEXITED(status)) {
+//             cgiPID = -1;
+//             // std::ofstream osf("cgi_output.log");
+//             // char buf[2000];
+//             // buf[read(_cgiPipeFd, buf, 1999)] = '\0';
+//             // osf << buf;
+//             if (WEXITSTATUS(status) != 0) {
+//                 // osf << this->getRequestBody();
+//                 std::cout << "WEXITSTATUS(status) = " << WEXITSTATUS(status) << std::endl;
+//                 throw (500);
+//             }
+//             std::cout << "WEXITSTATUS(status) = " << WEXITSTATUS(status) << std::endl;
+//             // EvManager::addEvent(_cgiPipeFd, EvManager::read, EvManager::inner);
+//             // this->addInnerFd(new InnerFd(_cgiPipeFd, *this, this->getResponseBody(), EvManager::read));
+//         }
+//     }
+//     return (true);
+// };
