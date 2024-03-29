@@ -23,7 +23,6 @@ std::string Errors::getPathFromConf(int status, ResponseParser& response){
             // concat root and error path
             error_file_path = response.corresponding_location->getRoot();
             error_file_path = concatStrings(error_file_path, it->second);
-			std::cout << "error file path = " << error_file_path << std::endl;
             return error_file_path;
         }
     }

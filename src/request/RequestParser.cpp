@@ -95,7 +95,6 @@ int   RequestParser::parseRoute()
          }
       }
       removeMultipleForwardSlashes(this->route);
-      std::cout << "Rout - " << this->route << std::endl;
       parseHttpVersion(line);
    }
    return 0;
@@ -106,12 +105,7 @@ int   RequestParser::parseHttpVersion(std::string line)
    unsigned long sub_start = line.rfind('/');
    if(sub_start != std::string::npos)
    {
-      try{
-         this->http_v = line.substr(sub_start + 1, (line.size() - sub_start));;
-      }
-      catch(std::exception &e){
-         std::cout << e.what() << std::endl;
-      }
+      this->http_v = line.substr(sub_start + 1, (line.size() - sub_start));;
    }
    return 0;
 }

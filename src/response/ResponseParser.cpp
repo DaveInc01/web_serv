@@ -12,7 +12,6 @@ ResponseParser::ResponseParser(RequestParser req, std::map<int, Config *> config
     this->is_finish = 0;
     this->configs_map = configs_map;
     this->setCorrespondingLocation();
-	std::cout << "serve root - " << serve_root << std::endl;
 	this->launchResponse();
 }
 
@@ -343,7 +342,6 @@ int ResponseParser::checkUploadPath()
 {
 	struct stat s;
 	std::string upload_path = this->corresponding_location->getUpload_path();
-	std::cout << "upload_path " << upload_path << std::endl;
 	if( stat(upload_path.c_str(), &s) == 0 )
 	{
 		if( s.st_mode & S_IFDIR )
@@ -357,42 +355,3 @@ int ResponseParser::checkUploadPath()
 	}
 	throw(400);
 }
-
-// bool ResponseParser::checkCgi() {
-//     if (cgiPID != -1) {
-//         // std::cout << ":checkCgi\n";
-//         int status;
-//         int waitRet;
-//         waitRet = waitpid(cgiPID, &status, WNOHANG);
-//         if (waitRet == -1) {
-//             throw (500);
-//         }
-//         if (waitRet == 0 && time(NULL) - cgiStartTime > CGI_TIMEOUT) {
-//             if (kill(cgiPID, SIGKILL) == -1) {
-//                 throw std::runtime_error(std::string("kill: ") + strerror(errno));
-//             };
-//             waitpid(cgiPID, &status, 0);
-//             cgiPID = -1;
-//             if (WTERMSIG(status) == SIGKILL) {
-//                 throw (508);
-//             }
-//             throw (500);
-//         }
-//         if (waitRet != 0 && WIFEXITED(status)) {
-//             cgiPID = -1;
-//             // std::ofstream osf("cgi_output.log");
-//             // char buf[2000];
-//             // buf[read(_cgiPipeFd, buf, 1999)] = '\0';
-//             // osf << buf;
-//             if (WEXITSTATUS(status) != 0) {
-//                 // osf << this->getRequestBody();
-//                 std::cout << "WEXITSTATUS(status) = " << WEXITSTATUS(status) << std::endl;
-//                 throw (500);
-//             }
-//             std::cout << "WEXITSTATUS(status) = " << WEXITSTATUS(status) << std::endl;
-//             // EvManager::addEvent(_cgiPipeFd, EvManager::read, EvManager::inner);
-//             // this->addInnerFd(new InnerFd(_cgiPipeFd, *this, this->getResponseBody(), EvManager::read));
-//         }
-//     }
-//     return (true);
-// };

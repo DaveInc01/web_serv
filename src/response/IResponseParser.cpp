@@ -39,7 +39,6 @@ Directives *IResponseParser::getCorrespondingLocation(Config* config){
         else{
             /* The location block was found from configs */
             this->location_class_path = config->_locations.at(index).first;
-            std::cout << "found loc block path - " << this->location_class_path << std::endl;
             return (config->_locations.at(index).second);
         }
     }
@@ -87,14 +86,12 @@ Config *IResponseParser::getMatchedServerName(std::vector<Config *> same_ports, 
         for (std::vector<Config *>::iterator confIt = same_ports.begin(); confIt != same_ports.end(); ++confIt)
         {
             matched_chars = longestCommonPrefix(req_host_name, (*confIt)->_server_name);
-            // std::cout << "matched chars - " << matched_chars << std::endl;
             name_positions.push_back(matched_chars);
         }
 
         pos = findIndexOfMax(name_positions);
     }
     return(same_ports.at(pos));
-    // return same_ports.at(0);
 }
 
 Config* IResponseParser::getCorrespondingServer()
@@ -129,15 +126,6 @@ int IResponseParser::findInVect(std::string url_location, Config * config)
 
 /* set the location PATH(serve_root) which should serve the client */
 int IResponseParser::setServeRoot(){
-
-/* redirect respone example */
-            // std::stringstream redirect_response;
-            // redirect_response << "HTTP/1.1 302 Found\r\n";
-            // redirect_response << "Location: http://www.example.com/new-page\r\n";
-            // redirect_response << "Connection: close\r\n";
-            // redirect_response << "\r\n";
-            // const std::string tmp = redirect_response.str();	
-
     std::string url_location = this->request.getRoute();
     size_t cut_from = url_location.find(this->location_class_path);
     if(cut_from != std::string::npos)

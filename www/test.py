@@ -1,8 +1,6 @@
 #! /usr/bin/env python3
-
-while Tre:
-    print("<h1>haha!</h1>")
+# while True:
 
 # import time
 
-#     time.sleep(1)
+print("<h1>Hello from Python!</h1>")

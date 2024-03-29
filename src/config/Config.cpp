@@ -34,8 +34,6 @@ void Config::fillLocations()
             _locations[i].second->_upload_path = this->_upload_path;
         if (_locations[i].second->_error_page.empty())
             _locations[i].second->_error_page = this->_error_page;
-        if (_locations[i].second->_return.empty())
-            _locations[i].second->_return = this->_return;
         if (_locations[i].second->_cgi.empty())
             _locations[i].second->_cgi = this->_cgi;
     }

@@ -149,7 +149,8 @@ std::string getDirContentHTML(const std::string &dir_path)
 		dir_html += "\n<tr>\n\t<td><a href=\"" + concatStrings(new_dir_path, vec[i]) + "\">" + vec[i] + "</a><br>";
 		char  *time = ctime(&info.st_mtime);
 		dir_html += "</td>\n\t<td>" + static_cast<std::string>(time) + "</td>\n\t<td>";
-		std::string tmp = std::to_string(tmp_info.st_size);
+        unsigned long sz = (unsigned long) tmp_info.st_size;
+		std::string tmp = intToString<unsigned long> (sz);
 		dir_html += tmp + "</td></tr>";
 	}
 	dir_html += "</table>\n<hr>\n</body>\n</html>";
