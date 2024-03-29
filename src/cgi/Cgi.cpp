@@ -34,7 +34,6 @@ int Cgi::execute(ResponseParser &client, const std::string &cgi_path) {
     osf << client.request.getPostReqBody();
     osf.flush();
     osf.close();
-
     if (pid == 0) {
         alarm(2);
         if (client.request.getMethod() == "POST") {
@@ -48,10 +47,11 @@ int Cgi::execute(ResponseParser &client, const std::string &cgi_path) {
         close(pipe_from_child[1]);
         if(execve(argv[0], argv, envp) == -1)
         {
-            for(unsigned int i = 0; envp[i]!=NULL; i++){
+            for(unsigned int i = 0; envp[i]!= NULL; i++){
                 delete envp[i];
             }
             delete envp;
+            std::cerr << "Cgi Error\n";
             throw(501);
         }
         exit(1);
@@ -60,6 +60,7 @@ int Cgi::execute(ResponseParser &client, const std::string &cgi_path) {
     waitpid(pid, &status, 0); // Wait for the child to finish
     if (WIFEXITED(status)) {
         std::remove(tmp_file_name.c_str());
+        std::cout << "Timeout error\n" << std::endl;
         throw(501);
     }
     std::remove(tmp_file_name.c_str());
@@ -109,6 +110,7 @@ char **Cgi::initEnv(ResponseParser &client)
         char *cstr = new char[elem.size() + 1];
         std::strcpy(cstr, elem.c_str());
 		envp[i++] = cstr;
+        // envp[i++] = strdup((it->first + "=" + it->second).c_str());
 	}
 	envp[i] = NULL;
 	return envp;

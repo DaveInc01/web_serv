@@ -94,6 +94,8 @@ int   RequestParser::parseRoute()
             this->route = this->route.erase(this->route.size()-1);
          }
       }
+      removeMultipleForwardSlashes(this->route);
+      std::cout << "Rout - " << this->route << std::endl;
       parseHttpVersion(line);
    }
    return 0;
@@ -270,4 +272,15 @@ int RequestParser::getFd()
 void RequestParser::setFd(int &fd)
 {
    this->_fd = fd;
+}
+
+void IRequestParser::removeMultipleForwardSlashes(std::string& str) {
+    std::string::iterator it = str.begin();
+    while (it != str.end()) {
+        if (*it == '/' && *(it + 1) == '/') {
+            str.erase(it + 1);
+        } else {
+            ++it;
+        }
+    }
 }

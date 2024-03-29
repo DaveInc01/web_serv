@@ -39,6 +39,7 @@ Directives *IResponseParser::getCorrespondingLocation(Config* config){
         else{
             /* The location block was found from configs */
             this->location_class_path = config->_locations.at(index).first;
+            std::cout << "found loc block path - " << this->location_class_path << std::endl;
             return (config->_locations.at(index).second);
         }
     }
@@ -46,7 +47,6 @@ Directives *IResponseParser::getCorrespondingLocation(Config* config){
     if(have_def_location)
     {
         /* set Location / as default */
-        std::cout << "Set Default Location from Conf '/' \n\n";
         index = findInVect("/", config);
         return (config->_locations.at(index).second);
     }
@@ -173,6 +173,8 @@ std::string IResponseParser::getServerRoot()
 {
     return this->serve_root;
 }
+
+
 
 // int IResponseParser::cutResponse(int from)
 // {

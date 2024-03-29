@@ -31,6 +31,8 @@ public:
    char*       getClientIp();
    bool        getIsMultipart();
    std::string getContentDisposition();
+   void        removeMultipleForwardSlashes(std::string& str);
+
 protected:
    std::string method;
    std::string route;

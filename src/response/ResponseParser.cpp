@@ -12,9 +12,8 @@ ResponseParser::ResponseParser(RequestParser req, std::map<int, Config *> config
     this->is_finish = 0;
     this->configs_map = configs_map;
     this->setCorrespondingLocation();
+	std::cout << "serve root - " << serve_root << std::endl;
 	this->launchResponse();
-	std::cout << "serve_root " << this->serve_root << "\ncorres loc - " << this->corresponding_location->getIndex()[0] << std::endl; 
-	
 }
 
 void ResponseParser::setResponse(std::string r){
@@ -158,6 +157,7 @@ int ResponseParser::generateGetResponse()
 				{				
 
 					concat_paths = concatStrings(serve_root, loc->_index[i]);
+					// this->request.removeMultipleForwardSlashes(concat_paths);
 					if(is_file_exists(concat_paths) && (is_regular_file(concat_paths) || sz == 0))
 					{
 						this->_response = generateResponseStringForPath(200, concat_paths);
