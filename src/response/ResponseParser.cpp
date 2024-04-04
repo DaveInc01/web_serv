@@ -210,7 +210,6 @@ int ResponseParser::checkMaxBodySize(){
 			max_body_size_bytes *= 1000; 
 		if ((pos == 2) || (pos == 3))
 			max_body_size_bytes *= 1000000;
-		std::cout << "Max body size - " << max_body_size_bytes << std::endl;
 		if(max_body_size_bytes < this->request.getPostReqBody().size())
 		{
 			throw(413);
@@ -346,7 +345,6 @@ int ResponseParser::checkUploadPath()
 	{
 		if( s.st_mode & S_IFDIR )
 		{
-			std::cout << "Upload path was found\n";
 			return 0;
 		}
 		else{

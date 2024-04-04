@@ -20,9 +20,9 @@ void Config::fillLocations()
 {
     for (int i = 0; i < (int)_locations.size(); i++)
     {
-        if (_locations[i].second->_autoindex.empty())
+        if (_locations[i].second->_autoindex.empty() || _locations[i].second->_autoindex == "off")
             _locations[i].second->_autoindex = this->_autoindex;
-        if (_locations[i].second->_root.empty())
+        if (_locations[i].second->_root.empty() || _locations[i].second->_root == "www")
             _locations[i].second->_root = this->_root;
         if (_locations[i].second->_index.empty())
             _locations[i].second->_index = this->_index;
@@ -30,7 +30,7 @@ void Config::fillLocations()
             _locations[i].second->_client_max_body_size = this->_client_max_body_size;
         if (_locations[i].second->_methods.empty())
             _locations[i].second->_methods = this->_methods;
-        if (_locations[i].second->_upload_path.empty())
+        if (_locations[i].second->_upload_path.empty() || _locations[i].second->_upload_path == "www")
             _locations[i].second->_upload_path = this->_upload_path;
         if (_locations[i].second->_error_page.empty())
             _locations[i].second->_error_page = this->_error_page;

@@ -35,7 +35,7 @@ int Cgi::execute(ResponseParser &client, const std::string &cgi_path) {
     osf.flush();
     osf.close();
     if (pid == 0) {
-        alarm(1);
+    alarm(1);
         if (client.request.getMethod() == "POST") {
             int fd = open(tmp_file_name.c_str(), O_RDWR);
             dup2(fd, 0);
@@ -59,9 +59,6 @@ int Cgi::execute(ResponseParser &client, const std::string &cgi_path) {
     }
     int status;
     waitpid(pid, &status, 0); // Wait for the child to finish
-    // if (WIFEXITED(status)) {
-    //     std::remove(tmp_file_name.c_str());
-    // }
     std::remove(tmp_file_name.c_str());
     close(pipe_from_child[1]);
     return (pipe_from_child[0]);

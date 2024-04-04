@@ -136,8 +136,8 @@ int IResponseParser::setServeRoot(){
             if(this->serve_root[0] != '/')
                 this->serve_root.insert(0, 1, '/');
             /* if root is ending with '/' remove it (www/tmp/<-) */
-            if(this->corresponding_location->_root[this->corresponding_location->_root.length() - 1] == '/')
-                this->corresponding_location->_root[this->corresponding_location->_root.length() - 1] = '\0';
+            // if(this->corresponding_location->_root[this->corresponding_location->_root.length() - 1] == '/')
+            //     this->corresponding_location->_root[this->corresponding_location->_root.length() - 1] = '\0';
             this->serve_root = this->corresponding_location->_root + this->serve_root;
         }
        catch(std::exception &e)

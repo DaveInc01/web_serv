@@ -296,7 +296,9 @@ Directives const* AllConfigs::get_location(int n, std::string str) const
 
 void AllConfigs::chech_directive()
 {
-    Directives const *l = get_location(1, "/upload");
+    Config const &s = get_Server(1);
+    Directives const *l = get_location(1, "/");
+    s.printConfig();
     if (l != NULL)
         l->printDirective();
 }
